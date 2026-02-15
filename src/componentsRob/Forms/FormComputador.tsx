@@ -40,7 +40,7 @@ const PRESETS = {
     MarcaMonitor: "Dell",
     Processador: "Intel Core I5-10400",
     Tamanho: "Integrado",
-    Memoria: "8Gb DDR4",
+    Memoria: "Memoria Ram - 8 Gb",
     ModeloMonitor: "Integrado",
   },
   lenovo: {
@@ -133,7 +133,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     },
   });
 
-  // --- FETCH API: Carregar Secretarias ---
+ 
  useEffect(() => {
     async function carregarSecretarias() {
       try {

@@ -5,17 +5,19 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-
 import { Plus, Trash } from "lucide-react"
 import { useState } from "react"
+// Importe a sua instância do axios aqui
+import api from "@/services/api";
+
 interface FormSecretariaProps {
     onClose: () => void;
 }
 
 export default function FormSecretaria({ onClose }: FormSecretariaProps) {
-   
+
     const [isLoading, setIsLoading] = useState(false);
-   
+
     const formSchema = z.object({
         secretaria: z.string().min(10, {
             message: "O nome de secretaria deve ter pelo menos 10 caracteres.",
@@ -25,8 +27,8 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
                 nome: z.string().min(1, { message: "O nome do departamento é obrigatório." })
             })
         ).min(1, { message: "Adicione pelo menos um departamento." })
-
     })
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -40,45 +42,34 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
         name: "departamentos",
     })
 
-
-
-
-
     async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-        // 1. Transformamos os dados para o formato do Java DTO
-        const payload = {
-            nome: values.secretaria, // De 'secretaria' para 'nome'
-            departamentos: values.departamentos.map(d => d.nome) // De [{nome: 'x'}] para ['x']
-        };
+        setIsLoading(true);
+        try {
+            // 1. Transformamos os dados para o formato do Java DTO
+            const payload = {
+                nome: values.secretaria,
+                departamentos: values.departamentos.map(d => d.nome)
+            };
 
-        const response = await fetch("http://localhost:8080/secretaria", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload), // Enviamos o payload transformado
-        });
+            // 2. Chamada usando o Axios (api service)
+            // Não precisa de JSON.stringify nem headers manuais
+            const response = await api.post("/secretaria", payload);
 
-        if (!response.ok) {
-            throw new Error("Erro ao salvar os dados");
+            // 3. Feedback
+            // No axios, o corpo da resposta está em response.data
+            console.log("Sucesso:", response.data);
+            
+            // Se seu backend retorna apenas uma String, o alert vai mostrar ela corretamente
+            alert("Secretaria cadastrada com sucesso!"); 
+            
+            onClose();
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+            alert("Não foi possível salvar a secretaria.");
+        } finally {
+            setIsLoading(false);
         }
-
-        // 2. IMPORTANTE: Seu Java retorna uma String, não um JSON.
-        // Use response.text() em vez de response.json()
-        const message = await response.text();
-        console.log("Sucesso:", message);
-
-        alert(message);
-        onClose();
-    } catch (error) {
-        console.error("Erro na requisição:", error);
-        alert("Não foi possível salvar a secretaria.");
-    } finally {
-        setIsLoading(false);
     }
-}
 
     return (
         <Card className="min-w-[450px]">
@@ -110,7 +101,7 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
 
                         {/* SEÇÃO: DEPARTAMENTOS */}
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between  pb-2">
+                            <div className="flex items-center justify-between pb-2">
                                 <FormLabel className="text-base">Departamentos</FormLabel>
                                 <Button
                                     type="button"
@@ -145,7 +136,7 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
                                                         size="icon"
                                                         className="text-destructive hover:bg-destructive/10"
                                                         onClick={() => remove(index)}
-                                                        disabled={fields.length === 1} // Mantém ao menos um
+                                                        disabled={fields.length === 1}
                                                     >
                                                         <Trash className="h-4 w-4" />
                                                     </Button>
@@ -161,16 +152,13 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
                 </Form>
             </CardContent>
             <CardFooter className="flex gap-2 justify-end">
-
-                <Button variant="outline" className="" onClick={onClose}>
+                <Button variant="outline" onClick={onClose}>
                     Cancelar
                 </Button>
-                <Button type="submit" variant="blue" className="" form="secretaria-form" disabled={isLoading}>
-                    Criar Secretaria
+                <Button type="submit" variant="blue" form="secretaria-form" disabled={isLoading}>
+                    {isLoading ? "Salvando..." : "Criar Secretaria"}
                 </Button>
             </CardFooter>
-
         </Card >
-
     )
 }
