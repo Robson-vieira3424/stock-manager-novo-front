@@ -1,4 +1,6 @@
+import { Departamento } from "./departamento";
+
 export type Secretaria = {
-    nome:string;
-    subtile:string;
+    nomeSecretaria:string;
+    departamentos: Departamento[];
 }

@@ -10,6 +10,7 @@ import MovimentacoesPage from "@/pages/protected/movimentacoes/Movimentacoes"
 import MapeamentoPage from "@/pages/protected/mapeamento/Mapeamento"
 import ManutencaoPage from "@/pages/protected/manutencao/Manutencao"
 import EstoquePage from "@/pages/protected/estoque/Estoque"
+import DetalhesSecretaria from "@/pages/protected/detalheSec/DetalhesSec"
 
 const router = createBrowserRouter([
   {
@@ -17,13 +18,11 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    // Rota Pai que segura o Layout
     element: (
       <PrivateRoutes>
-        <DefaultLayout /> {/* Aqui usamos o layout com Sidebar e Outlet */}
+        <DefaultLayout /> 
       </PrivateRoutes>
     ),
-    // Todas as páginas abaixo serão renderizadas dentro do <Outlet /> do DefaultLayout
     children: [
       {
         path: "/dashboard",
@@ -40,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "/mapeamento",
         element: <MapeamentoPage />,
+      },
+      {
+        path: "/mapeamento/:id", 
+        element: <DetalhesSecretaria />,
       },
       {
         path: "/manutencao",
