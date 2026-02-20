@@ -78,9 +78,7 @@ const formSchema = z.object({
   Processador: z.string().min(4, "Mínimo 4 caracteres"),
   Memoria: z.string().min(3, "Selecione a memória"),
   Armazenamento: z.string().min(2, "Obrigatório"),
-  tipoArmazenamento: z.enum(["HD", "SSD", "Nvme"], {
-    required_error: "Selecione o tipo",
-  }),
+  tipoArmazenamento: z.enum(["HD", "SSD", "Nvme"], { error: "Selecione uma opção válida" }),
   sistemaOperacional: z.string().optional(),
 
   PatrimonioMonitor: z.string().optional(),
@@ -93,9 +91,8 @@ const formSchema = z.object({
   ModeloEstabilizador: z.string().optional(),
   Potencia: z.string().optional(),
 
-  secretariaId: z.number({ required_error: "Selecione uma secretaria" }),
-  setorId: z.number({ required_error: "Selecione um setor" }),
-
+  secretariaId: z.number({ error: "Selecione uma secretaria" }),
+  setorId: z.number({ error: "Selecione um setor" }),
   tipo: z.string().optional(),
 });
 
@@ -258,10 +255,9 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       
       // ADICIONE ESSA LINHA ABAIXO:
       // Se o preset tiver memória definida, preenche o campo
-      if (preset.Memoria) {
-         form.setValue("Memoria", preset.Memoria); 
+      if ("Memoria" in preset && preset.Memoria) {
+        form.setValue("Memoria", preset.Memoria);
       }
-
       if (cardSelecionado !== "allinone") {
         form.setValue("MarcaMonitor", preset.MarcaMonitor);
         form.setValue("TamanhoMonitor", preset.Tamanho);
@@ -389,8 +385,8 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                           </FormControl>
                           <SelectContent className="bg-white max-h-60">
                             {processadoresGenericos.map((p) => (
-                              <SelectItem key={p.name} value={p.name}>
-                                {p.name}
+                              <SelectItem key={p.nome} value={p.nome}>
+                                {p.nome}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -427,8 +423,8 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
           </FormControl>
           <SelectContent className="z-[9999] bg-white">
             {memoriasGenericas.map((m) => (
-              <SelectItem key={m.name} value={m.name}>
-                {m.name}
+              <SelectItem key={m.nome} value={m.nome}>
+                {m.nome}
               </SelectItem>
             ))}
           </SelectContent>

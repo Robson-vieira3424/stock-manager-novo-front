@@ -414,7 +414,7 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="obs">Observações</Label>
                         <Controller
-                            name="observações"
+                            name="descricao"
                             control={form.control}
                             render={({ field }) => (
                                 <Textarea

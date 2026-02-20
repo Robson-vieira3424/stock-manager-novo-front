@@ -3,11 +3,11 @@ import { LucideIcon, Building2, ChevronRight } from "lucide-react";
 
 interface CardSecretariaProps {
     nome: string;
-    subtile: string;
-    icon?: LucideIcon;
+   
+    icon: LucideIcon;
 }
 
-export default function CardSecretaria({ nome, subtile, icon: Icon = Building2 }: CardSecretariaProps) {
+export default function CardSecretaria({ nome, icon: Icon = Building2 }: CardSecretariaProps) {
     return (
         <Card className="hover:shadow-md transition-shadow cursor-pointer ">
             <CardContent className="flex items-center gap-4 p-4">
@@ -16,7 +16,6 @@ export default function CardSecretaria({ nome, subtile, icon: Icon = Building2 }
                 </div>
                 <div className="flex flex-col overflow-hidden">
                     <h3 className="font-semibold text-sm truncate">{nome}</h3>
-                    <p className="text-xs text-muted-foreground truncate">{subtile}</p>
                 </div>
                 <div className="flex flex-1 justify-end">
                     <ChevronRight />

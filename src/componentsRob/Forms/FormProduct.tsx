@@ -6,12 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod"
-import api from "../../services/api"
+import { z } from "zod";
+import api from "../../services/api";
 
 interface FormProps {
     onClose: () => void;
 }
+
+// 1. Schema do Zod
 const formSchema = z.object({
     name: z.string().min(6, {
         message: "O nome do Item deve ter pelo menos 6 caracteres.",
@@ -22,27 +24,31 @@ const formSchema = z.object({
     quantity: z.coerce.number().min(0, {
         message: "A quantidade mínima cadastrável de um produto é 0.",
     }),
-    min: z.coerce.number().min(1, {
+    min: z.coerce.number().min(0, { // Ajustado para bater com a sua mensagem (0)
         message: "A quantidade mínima é 0.",
     }),
+});
 
-})
+// 2. Tipo gerado a partir do Schema (Isso resolve todos os erros)
+type FormProductValues = z.infer<typeof formSchema>;
 
 export default function FormProduct({ onClose }: FormProps) {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    // 3. Tipando o useForm com a interface criada acima
+    const form = useForm<FormProductValues>({
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             name: "",
             tipoProduto: "",
             quantity: 0,
-            min: 1,
-        },
-    })
+            min: 0,
+        }
+    });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    // 4. Tipando os valores do onSubmit
+    const onSubmit = async (values: FormProductValues) => {
         setIsLoading(true);
         try {
             const payload = {
@@ -52,15 +58,15 @@ export default function FormProduct({ onClose }: FormProps) {
                 min: values.min
             }
             const response = await api.post("/product", payload);
-         
             console.log("Produto criado:", response.data);
+            onClose(); // Fechar apenas no sucesso (opcional, mas recomendado)
         }
         catch (error) {
             console.error("Erro na requisição:", error);
             alert("Não foi possível salvar o produto.");
         } finally {
             setIsLoading(false);
-            onClose();
+            // Se quiser fechar mesmo com erro, volte o onClose para cá.
         }
     }
 
@@ -70,12 +76,10 @@ export default function FormProduct({ onClose }: FormProps) {
                 <CardTitle className="text-[20px]">
                     Adicionar Item ao Estoque
                 </CardTitle>
-
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-
                         <FormField
                             control={form.control}
                             name="name"
@@ -112,7 +116,6 @@ export default function FormProduct({ onClose }: FormProps) {
                                                 <SelectItem value="GABINETE">Gabinete</SelectItem>
                                                 <SelectItem value="TONER">Toner</SelectItem>
                                                 <SelectItem value="OUTROS">Outros</SelectItem>
-
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -120,38 +123,36 @@ export default function FormProduct({ onClose }: FormProps) {
                                 )}
                             />
                         </div>
-                        <div className="w-full flex flex-nowrap justify-between">
+                        <div className="w-full flex flex-nowrap justify-between gap-4">
                             <FormField
                                 control={form.control}
                                 name="quantity"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex-1">
                                         <FormLabel>Quantidade</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 min={0}
-                                                value={field.value ?? ""}
-                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                                // React Hook Form com z.coerce.number() lida melhor sem forçar o Number()
+                                                {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-
                             <FormField
                                 control={form.control}
                                 name="min"
                                 render={({ field }) => (
-                                    <FormItem>
+                                    <FormItem className="flex-1">
                                         <FormLabel>Estoque Mínimo</FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 min={0}
-                                                value={field.value ?? ""}
-                                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                                {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -159,19 +160,17 @@ export default function FormProduct({ onClose }: FormProps) {
                                 )}
                             />
                         </div>
-
                     </form>
                 </Form>
             </CardContent>
             <CardFooter className="flex gap-2 justify-between w-full items-center">
-
-                <Button variant="outline" className="w-[46%] hover:cursor-pointer" onClick={onClose}>
+                <Button type="button" variant="outline" className="w-[46%] hover:cursor-pointer" onClick={onClose}>
                     Cancelar
                 </Button>
-                <Button type="submit" variant="blue" className="w-[46%] hover:cursor-pointer" form="product-form" disabled={isLoading}>
+                <Button type="submit" variant="default" className="w-[46%] hover:cursor-pointer bg-blue-600 hover:bg-blue-700 text-white" form="product-form" disabled={isLoading}>
                     Cadastrar Produto
                 </Button>
             </CardFooter>
-
-        </Card >)
+        </Card>
+    )
 }

@@ -12,10 +12,10 @@ import {
     ShieldCheck,
     Leaf,
     Truck,
-    MapPinned
+    MapPinned, LucideIcon
 } from "lucide-react";
 
-const iconMap: Record<string> = {
+const iconMap: Record<string, LucideIcon> = {
     "Saúde": Stethoscope,
     "Educação": GraduationCap,
     "Segurança": ShieldCheck,
@@ -87,10 +87,10 @@ export default function MapeamentoPage() {
                              onClick={() => handleNavigate(sec.id)}
                              className="cursor-pointer hover:opacity-80 transition-opacity"
                          >
-                             <CardSecretaria
-                                 nome={sec.nome}
-                                 subtile={sec.subtile}
-                                 icon={iconMap[sec.nome] || iconMap.default}
+                             <CardSecretaria 
+                                 nome={sec.nomeSecretaria}
+                                
+                                 icon={iconMap[sec.nomeSecretaria] || iconMap.default}
                              />
                          </div>
                      ))}

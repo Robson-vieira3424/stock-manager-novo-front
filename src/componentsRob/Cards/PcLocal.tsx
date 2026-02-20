@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Monitor, Cpu, MemoryStick, HardDrive, MapPin } from "lucide-react";
-// Certifique-se de que o caminho do tipo está correto conforme seu projeto
+import { Monitor, Cpu, MapPin } from "lucide-react";
 import { Departamento } from "@/types/departamento";
 
 interface PcLocalProps {
@@ -95,7 +94,7 @@ export default function PcLocal({ departamento }: PcLocalProps) {
 
                             {/* Footer: ID e Data (Extremidades) */}
                             <div className="flex justify-between items-center bg-zinc-50/50 p-2 px-3 text-xs text-zinc-500">
-                                <span className="font-medium">ID: <span className="text-zinc-700">{estacao.idEstacao}</span></span>
+                                <span className="font-medium">ID: <span className="text-zinc-700">{estacao.id}</span></span>
                                 {/* Data fake ou remover se não tiver no DTO */}
                                 <span>Manut: <span className="text-zinc-700">--/--/--</span></span>
                             </div>
