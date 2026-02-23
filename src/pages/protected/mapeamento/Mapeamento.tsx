@@ -52,7 +52,7 @@ const iconKeywords = [
 ]; 
 
 function getIconByNome(nome: string): LucideIcon {
-    const nomeLower = nome.toLowerCase();
+    const nomeLower = nome?.toLowerCase();
     const match = iconKeywords.find(item => nomeLower.includes(item.keyword));
     return match ? match.icon : Building2;
 }
