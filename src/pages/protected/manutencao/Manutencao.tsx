@@ -12,24 +12,24 @@ export default function ManutencaoPage() {
     const [modalAberto, setModalAberto] = useState(false);
     const [loading, setLoading] = useState(false)
     const [manutencoes, setManutencoes] = useState<manutecaoDTO[]>([]);
-    
-    async function getManutencoes(){
-        
-        try{
+
+    async function getManutencoes() {
+
+        try {
             setLoading(true);
             const response = await api.get("/manutencao");
             setManutencoes(response.data);
             console.log("manutenções chegando: ", response.data);
-        }catch(error){
+        } catch (error) {
             console.log("Erro ao buscar manutencoes", error);
-        }finally{
+        } finally {
             setLoading(false);
         }
     }
 
     useEffect(() => {
         getManutencoes();
-    },[])
+    }, [])
     return (
         <>
             <PageHeader
@@ -37,17 +37,22 @@ export default function ManutencaoPage() {
                 description="Acompanhe e Gerencie as Manutenções do departamento"
                 icon={Wrench}
                 buttonText="Criar Manutenção"
-                onClickButtonHeader={() => setModalAberto(true)} />
+                onClickButtonHeader={() => setModalAberto(true)}
+            />
 
-            <PainelManutencao />
-            <Progresso />
+            <PainelManutencao
+            />
+            <Progresso
+            />
 
             <FormManutencao
                 open={modalAberto}
-                onOpenChange={setModalAberto} />
+                onOpenChange={setModalAberto}
+            />
 
 
-            <PainelOs data={manutencoes} />
+            <PainelOs data={manutencoes}
+            />
         </>
 
     )

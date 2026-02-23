@@ -8,8 +8,7 @@ interface PcLocalProps {
 
 export default function PcLocal({ departamento }: PcLocalProps) {
     return (
-        // Ajustei apenas a largura para ser responsiva (full no mobile, 30% no desktop)
-        // Se quiser estritamente igual ao anterior em todas as telas, use w-[30%]
+      
         <Card className="w-full md:w-[48%] lg:w-[30%] h-fit">
             <CardHeader className="flex flex-row items-center gap-4 pb-2">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
@@ -35,7 +34,7 @@ export default function PcLocal({ departamento }: PcLocalProps) {
                     departamento.estacoes.map((estacao) => (
                         <div
                             key={estacao.id}
-                            className="border border-zinc-200 rounded-md overflow-hidden bg-white hover:border-blue-300 transition-colors"
+                            className="border border-zinc-200 rounded-md overflow-hidden bg-white cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.02] hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/20"
                         >
 
                             {/* Parte Superior: Ícone, Nome, Status e Specs */}

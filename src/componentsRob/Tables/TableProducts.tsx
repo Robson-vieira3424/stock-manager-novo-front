@@ -89,7 +89,7 @@ export default function ProductTable() {
         />
       </section>
 
-      {/* Tabela */}
+      
       <section className="w-[96.5%] mx-auto mb-4 border border-black/5 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full border-separate border-spacing-0 bg-[#F2F4F6]">
           <thead className="bg-white">
@@ -109,11 +109,11 @@ export default function ProductTable() {
                   key={item.id || index}
                   className="bg-white transition-all hover:bg-gray-50/50 hover:scale-[1.001] animate-rowFadeIn"
                 >
-                  <td className="p-4 text-sm text-center  font-semibold text-black/90">{item.name}</td>
-                  <td className="p-4 text-sm text-center  text-gray-600">{item.categoria || "Geral"}</td>
-                  <td className="p-4 text-sm text-center ">{item.quantity}</td>
-                  <td className="p-4 text-sm text-center ">{item.min}</td>
-                  <td className="p-4 text-center  align-middle ">
+                  <td className="p-4 text-sm text-center border-b border-black/5 font-semibold text-black/90">{item.name}</td>
+                  <td className="p-4 text-sm text-center border-b border-black/5 text-gray-600">{item.categoria || "Geral"}</td>
+                  <td className="p-4 text-sm text-center border-b border-black/5">{item.quantity}</td>
+                  <td className="p-4 text-sm text-center border-b border-black/5">{item.min}</td>
+                  <td className="p-4 text-center  align-middle border-b border-black/5 ">
                     <span className={` px-3 py-1 rounded-full max-w-30 inline-flex justify-center  font-bold text-[10px] uppercase ${getStatusStyles(currentStatus)}`}>
                       {currentStatus}
                     </span>

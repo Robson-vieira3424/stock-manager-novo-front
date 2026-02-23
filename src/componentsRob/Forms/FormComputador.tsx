@@ -101,7 +101,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface Secretaria {
   id: number;
   nome: string;
-  departamentos: { id: number; nome: string }[];
+  departamento: { id: number; nome: string }[];
 }
 
 export default function FormComputadores({ onClose }: { onClose: () => void }) {
@@ -127,19 +127,30 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       sistemaOperacional: undefined,
       secretariaId: undefined,
       setorId: undefined,
+
+      PatrimonioMonitor: "",
+      MarcaMonitor: "",
+      ModeloMonitor: "",
+      TamanhoMonitor: "",
+      PatrimonioEstabilizador: "",
+      MarcaEsatbilizador: "",
+      ModeloEstabilizador: "",
+      Potencia: "",
     },
   });
 
- 
- useEffect(() => {
+
+  useEffect(() => {
     async function carregarSecretarias() {
       try {
         // Axios já retorna o JSON em .data e lança erro se falhar
         const response = await api.get("/secretaria");
         setSecretarias(response.data);
+
+        console.log("Secretarias vindo para o formulario", response.data);
       } catch (error) {
         console.error("Erro ao carregar secretarias", error);
-        toast.error("Erro ao carregar secretarias.");
+        toast.error("Erro ao carregar secretarias:");
       }
     }
     carregarSecretarias();
@@ -177,12 +188,13 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     try {
       const response = await api.get("/product/tipoProduto/PROCESSADOR");
       setProcessadoresGenericos(response.data);
+      console.log("Processadores chegando: ", response.data)
     } catch (erro) {
       toast.error("Erro ao buscar processadores.");
       console.log("Erro ao buscar processadores:", erro);
     }
   }
- async function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues) {
     if (!cardSelecionado) {
       alert("Por favor, selecione o tipo de equipamento (Card) no topo.");
       return;
@@ -193,22 +205,22 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     // ... (Lógica de montagem dos payloads auxiliar permanece igual) ...
     const estabilizadorPayload = usarEstabilizador
       ? {
-          patrimonio: values.PatrimonioEstabilizador || "",
-          marca: values.MarcaEsatbilizador || "",
-          modelo: values.ModeloEstabilizador || "",
-          potencia: values.Potencia || "",
-        }
+        patrimonio: values.PatrimonioEstabilizador || "",
+        marca: values.MarcaEsatbilizador || "",
+        modelo: values.ModeloEstabilizador || "",
+        potencia: values.Potencia || "",
+      }
       : { patrimonio: "N/A", marca: "N/A", modelo: "N/A", potencia: "" };
 
     const monitorPayload =
       cardSelecionado === "allinone"
         ? { patrimonio: "Integrado", marca: "Dell", modelo: "Monitor Integrado", tamanho: "24'" }
         : {
-            patrimonio: values.PatrimonioMonitor || "",
-            marca: values.MarcaMonitor || "",
-            modelo: values.ModeloMonitor || "",
-            tamanho: values.TamanhoMonitor || "",
-          };
+          patrimonio: values.PatrimonioMonitor || "",
+          marca: values.MarcaMonitor || "",
+          modelo: values.ModeloMonitor || "",
+          tamanho: values.TamanhoMonitor || "",
+        };
 
     const payload = {
       computador: {
@@ -232,15 +244,15 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     try {
       // POST com AXIOS: URL e Payload direto. Sem headers manuais.
       await api.post("/estacao", payload);
-
+      console.log("Estação enviada", payload);
       toast.success("Equipamento cadastrado com sucesso!");
+      
       form.reset();
       onClose();
 
     } catch (error) {
       console.error("Erro ao cadastrar", error);
-      
-      // Axios coloca a resposta de erro em error.response
+
       const msgErro = error.response?.data?.message || "Erro ao salvar no servidor.";
       toast.error(msgErro);
     }
@@ -252,7 +264,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       form.setValue("Marca", preset.Marca);
       form.setValue("Modelo", preset.Modelo);
       form.setValue("Processador", preset.Processador);
-      
+
       // ADICIONE ESSA LINHA ABAIXO:
       // Se o preset tiver memória definida, preenche o campo
       if ("Memoria" in preset && preset.Memoria) {
@@ -384,9 +396,9 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-white max-h-60">
-                            {processadoresGenericos.map((p) => (
-                              <SelectItem key={p.nome} value={p.nome}>
-                                {p.nome}
+                            {processadoresGenericos.map((p, index) => (
+                              <SelectItem key={`${p.name}-${index}`} value={p.name}>
+                                {p.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -407,44 +419,44 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                   )}
                 />
                 <FormField
-  control={form.control}
-  name="Memoria"
-  render={({ field }) => (
-    <FormItem className="min-w-[48%] flex-1">
-      <FormLabel>Memoria Ram</FormLabel>
-      
-     
-      {cardSelecionado === "generico" ? ( 
-        <Select onValueChange={field.onChange} value={field.value}>
-          <FormControl>
-            <SelectTrigger   className={selectTriggerStyle}>
-              <SelectValue  placeholder="Selecione a Memoria ram" />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent className="z-[9999] bg-white">
-            {memoriasGenericas.map((m) => (
-              <SelectItem key={m.nome} value={m.nome}>
-                {m.nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-       
-        <FormControl>
-          <Input 
-            {...field} 
-            placeholder="Memória do Preset" 
-            className={`${inputStyle} bg-gray-100 text-gray-500 cursor-not-allowed`}
-            disabled={true} 
-          />
-        </FormControl>
-      )}
-      
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                  control={form.control}
+                  name="Memoria"
+                  render={({ field }) => (
+                    <FormItem className="min-w-[48%] flex-1">
+                      <FormLabel>Memoria Ram</FormLabel>
+
+
+                      {cardSelecionado === "generico" ? (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className={selectTriggerStyle}>
+                              <SelectValue placeholder="Selecione a Memoria ram" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="z-[9999] bg-white">
+                            {memoriasGenericas.map((m, index) => (
+                              <SelectItem key={`${m.name}-${index}`} value={m.name}>
+                                {m.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Memória do Preset"
+                            className={`${inputStyle} bg-gray-100 text-gray-500 cursor-not-allowed`}
+                            disabled={true}
+                          />
+                        </FormControl>
+                      )}
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               {/* Linha 2 (Items menores) */}
@@ -592,40 +604,41 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
             <h2 className="font-semibold text-lg text-gray-800">Localização</h2>
           </div>
           <div className="flex flex-row flex-wrap gap-5 pb-4">
-            <FormField control={form.control} name="secretariaId" 
-           render={({ field }) => (
-              <FormItem className="min-w-[48%] flex-1">
-                <FormLabel>Secretaria *</FormLabel>
-                <Select
-                value={field.value ? String(field.value) : undefined}
-                  onValueChange={(val) => {
-                    const id = Number(val);
-                    form.setValue("secretariaId", id);
-                    const sec = secretarias.find(s => s.id === id);
-                    setSetores(sec?.departamentos || []);
-                  form.setValue("secretariaId", id, { shouldValidate: true }); // Resetar setor visualmente se necessário ou tratar com undefined
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger className={selectTriggerStyle}>
-                      <SelectValue placeholder="Selecione secretaria" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="z-[9999] bg-white max-h-60">
-                    {secretarias.map((s) => (
-                      <SelectItem key={s.id} value={String(s.id)}>{s.nome}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )} />
+            <FormField control={form.control} name="secretariaId"
+              render={({ field }) => (
+                <FormItem className="min-w-[48%] flex-1">
+                  <FormLabel>Secretaria *</FormLabel>
+                  <Select
+                    value={field.value ? String(field.value) : undefined}
+                    onValueChange={(val) => {
+                      const id = Number(val);
+                      form.setValue("secretariaId", id);
+                      const sec = secretarias.find(s => s.id === id);
+                      setSetores(sec?.departamento || []);
+                      form.setValue("secretariaId", id, { shouldValidate: true }); // Resetar setor visualmente se necessário ou tratar com undefined
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger className={selectTriggerStyle}>
+                        <SelectValue placeholder="Selecione secretaria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="z-[9999] bg-white max-h-60">
+                      {secretarias.map((s) => (
+                        <SelectItem key={s.id} value={String(s.id)}>{s.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
 
-            <FormField control={form.control} name="setorId" render={() => (
+            <FormField control={form.control} name="setorId" render={({field}) => (
               <FormItem className="min-w-[48%] flex-1">
                 <FormLabel>Setor *</FormLabel>
                 <Select
                   disabled={!setores.length}
+                  value={field.value ? String(field.value) : undefined}
                   onValueChange={(val) => form.setValue("setorId", Number(val))}
                 >
                   <FormControl>

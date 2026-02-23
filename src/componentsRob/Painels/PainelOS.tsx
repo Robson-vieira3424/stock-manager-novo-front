@@ -9,10 +9,8 @@ interface ManutencoesPainelProps {
 
 export default function PainelOs({ data }: ManutencoesPainelProps) {
 
-    // Função auxiliar para evitar repetir código nas abas
     const renderContent = (filtroStatus: string | null) => {
 
-        // Se filtro for nulo, pega tudo, senão, filtra pelo status
         const itensFiltrados = filtroStatus
             ? data.filter(item => item.status === filtroStatus)
             : data;
@@ -22,7 +20,6 @@ export default function PainelOs({ data }: ManutencoesPainelProps) {
         }
 
         return itensFiltrados.map((manutencao) => (
-            // Passando o objeto 'manutencao' para o Card
             <CardManutencao key={manutencao.id} data={manutencao} />
         ));
     };
@@ -37,7 +34,6 @@ export default function PainelOs({ data }: ManutencoesPainelProps) {
                             <CardDescription>Gerencie os computadores em manutenção</CardDescription>
                         </div>
                         <TabsList className="flex w-auto h-9 hover:cursor-pointer">
-                            {/* Os values aqui devem bater com o seu enum/string de status */}
                             <TabsTrigger className="text-xs px-3 hover:cursor-pointer" value="todos">TODOS</TabsTrigger>
                             <TabsTrigger className="text-xs px-3 hover:cursor-pointer" value="andamento">EM ANDAMENTO</TabsTrigger>
                             <TabsTrigger className="text-xs px-3 hover:cursor-pointer" value="pecas">PEÇAS</TabsTrigger>
@@ -48,7 +44,6 @@ export default function PainelOs({ data }: ManutencoesPainelProps) {
                 </CardHeader>
 
                 <CardContent>
-                    {/* Renderizando o conteúdo baseado na aba */}
                     <TabsContent value="todos">
                         {renderContent(null)}
                     </TabsContent>
@@ -71,6 +66,7 @@ export default function PainelOs({ data }: ManutencoesPainelProps) {
 
                 </CardContent>
                 <CardFooter>
+                    {/*TODO: ADICIONAR PAGINIÇÃO AQUI  */}
                 </CardFooter>
             </Card>
         </Tabs>

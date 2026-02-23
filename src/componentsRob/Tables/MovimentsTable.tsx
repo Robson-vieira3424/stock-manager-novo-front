@@ -13,7 +13,7 @@ type Movimentacao = {
   departamentoId: number;
   observacao: string;
   termo: string;
-  destinoFormatado: string; 
+  destinoFormatado: string;
 };
 
 export default function MovimentsTable() {
@@ -25,7 +25,7 @@ export default function MovimentsTable() {
       // Substituindo Axios por Fetch
       const response = await api.get("/moviments");
 
-      
+
 
       const data = await response.data;
       setListaMovimentacoes(data);
@@ -93,16 +93,22 @@ export default function MovimentsTable() {
                   <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">
                     <span
                       className={`rounded-2xl px-2 py-1 text-xs font-bold ${item.type === "INPUT"
-                          ? "bg-[#21C45D] text-[#ffffff]"
-                          : "bg-[#0080FF]  text-[#ffffff]"
+                        ? "bg-[#21C45D] text-[#ffffff]"
+                        : "bg-[#0080FF]  text-[#ffffff]"
                         }`}
                     >
-                      {item.type === "OUTPUT" ? "SAIDA":"ENTRADA"}
+                      {item.type === "OUTPUT" ? "SAIDA" : "ENTRADA"}
                     </span>
                   </td>
-                  <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">{item.amount}</td>
-                  <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">{item.destinoFormatado || "-"}</td>
-                  <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">{item.observacao || "-"}</td>
+                  <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">
+                    {item.amount}
+                  </td>
+                  <td className="max-w-[200px] border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">
+                    {item.destinoFormatado || "-"}
+                  </td>
+                  <td className="max-w-[200px] text-center border-b border-black/[0.03] px-3 py-[15px]  text-sm text-[#070707]">
+                    {item.observacao || "-"}
+                  </td>
                   <td className="border-b border-black/[0.03] px-3 py-[15px] text-center text-sm text-[#070707]">
                     <div className="flex justify-center gap-2">
                       <button className="text-blue-600 transition-colors hover:text-blue-800">

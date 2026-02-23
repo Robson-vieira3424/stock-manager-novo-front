@@ -1,3 +1,3 @@
 export type Produto ={
- nome: string;
+ name: string;
 }

@@ -11,5 +11,5 @@ export type manutecaoDTO = {
     observacao: string;
     dataPrevisao: string;
     tecnicoId: number;
-    nome:string;
+    nomeTecnico:string;
 }

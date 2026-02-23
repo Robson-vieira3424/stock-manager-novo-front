@@ -64,7 +64,7 @@ export default function CardManutencao({ data, onView, onEdit }: CardProps) {
                     <div className="flex md:flex-col gap-3 md:gap-1 text-sm text-slate-600 border-t md:border-t-0 pt-2 md:pt-0 mt-2 md:mt-0">
                         <div className="flex items-center gap-2" title="Técnico Responsável">
                             <User size={14} className="text-slate-400" />
-                            <span className="text-xs font-medium">{data.tecnicoId}</span>
+                            <span className="text-xs font-medium">{data.nomeTecnico}</span>
                         </div>
                         <div className="flex items-center gap-2" title="Previsão de Entrega">
                             <Calendar size={14} className="text-slate-400" />
@@ -83,7 +83,7 @@ export default function CardManutencao({ data, onView, onEdit }: CardProps) {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0 text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="h-8 w-8 p-0"
                         onClick={() => onView && onView(data.id || 0)}
                         title="Visualizar Detalhes"
                     >
@@ -93,7 +93,7 @@ export default function CardManutencao({ data, onView, onEdit }: CardProps) {
                     <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0 text-amber-600 border-amber-200 hover:bg-amber-50"
+                        className="h-8 w-8 p-0"
                         onClick={() => onEdit && onEdit(data.id || 0)}
                         title="Editar / Atualizar"
                     >
@@ -101,7 +101,7 @@ export default function CardManutencao({ data, onView, onEdit }: CardProps) {
                     </Button>
 
                     {/* STATUS AGORA ESTÁ AQUI NA DIREITA */}
-                   
+
 
                 </div>
 

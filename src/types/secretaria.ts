@@ -5,3 +5,5 @@ export type Secretaria = {
     nomeSecretaria:string;
     departamentos: Departamento[];
 }
+
+

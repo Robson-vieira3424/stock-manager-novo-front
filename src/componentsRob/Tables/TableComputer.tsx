@@ -37,6 +37,7 @@ export default function TableComputador() {
       setLoading(true);
       const response = await api.get("/estacao");
       const result =  response.data;
+      console.log("Estações: ", result)
       setData(result);
       console.log("dados de estacao recebidos:", result);
 

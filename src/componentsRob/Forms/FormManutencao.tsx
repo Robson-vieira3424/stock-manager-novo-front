@@ -72,7 +72,8 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
             patrimonio: "",
             descricao: "",
             tecnico: "",
-            tipoManutencao: "", // Adicionado ao defaultValues
+            tipoManutencao: "",
+            observacoes:"", 
             prioridade: "",
             dataPrevisao: undefined as Date | undefined,
         }
@@ -128,13 +129,13 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
 
         try {
             const payload = {
-                computadorDTO: {
+                pc: {
                     id: selectedComputer.id 
                 },
                 descricaoProblema: data.descricao,
                 tipo: data.tipoManutencao,
                 prioridade: data.prioridade.toUpperCase(), 
-                observacao: data.observações,
+                observacoes: data.observações,
                 dataPrevisao: data.dataPrevisao ? data.dataPrevisao.toISOString().split('T')[0] : null, 
                 tecnicoId: Number(data.tecnico)                
             };
@@ -414,7 +415,7 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="obs">Observações</Label>
                         <Controller
-                            name="descricao"
+                            name="observacoes"
                             control={form.control}
                             render={({ field }) => (
                                 <Textarea
