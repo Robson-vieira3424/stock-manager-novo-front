@@ -1,15 +1,14 @@
 import { FiEdit } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { useEffect, useState } from "react";
-import api from "../../services/api"
+import api from "../../services/api";
 
-
-// No Vite, garanta que as fontes estejam instaladas: npm install @fontsource/roboto
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import formatarData from "@/utils/formatDate";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Produto = {
   id?: number;
@@ -24,30 +23,36 @@ type Produto = {
 export default function ProductTable() {
   const [listaProdutos, setListaProdutos] = useState<Produto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [pagina, setPagina] = useState(0);
-  const [totalPaginas, setTotalPaginas] = useState(0);
 
-  const PAGE_SIZE = 15;
- 
+  // Estados de Paginação
+  const [pagina, setPagina] = useState(0);
+  const [quantidade, setQuantidade] = useState(15);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [totalElementos, setTotalElementos] = useState(0); // <-- Novo estado para o total de itens
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       getProdutos();
     }, 500);
     return () => clearTimeout(timeoutId);
-  }, [pagina]); 
+  }, [pagina, quantidade]);
 
   const getProdutos = async () => {
     setIsLoading(true);
-   try {
+    try {
       const response = await api.get("/product", {
         params: {
-          size: PAGE_SIZE
+          pagina: pagina,
+          quantidade: quantidade,
+          ordem: "name",
+          direcao: "ASC"
         }
       });
 
       const data = response.data;
       setListaProdutos(data.content || []);
       setTotalPaginas(data.totalPages || 0);
+      setTotalElementos(data.totalElements || 0); // <-- Pegando o total de registros do Spring
 
     } catch (error) {
       console.error("Erro ao buscar produtos:", error);
@@ -56,6 +61,10 @@ export default function ProductTable() {
     }
   };
 
+  const handleQuantidadeChange = (value: string) => {
+    setQuantidade(Number(value));
+    setPagina(0);
+  };
 
   const getStatusLabel = (qtd: number, min: number, statusBackend?: string) => {
     if (statusBackend) return statusBackend.replace("_", " ");
@@ -73,8 +82,7 @@ export default function ProductTable() {
     }
   };
 
-
-  if (isLoading) return <div className="p-10 font-sans">Carregando...</div>;
+  if (isLoading && listaProdutos.length === 0) return <div className="p-10 font-sans">Carregando...</div>;
 
   return (
     <section className="shadow-[0px_10px_30px_rgba(0,0,0,0.1)] w-full mx-auto my-8 rounded-2xl animate-tableFadeIn font-sans">
@@ -89,8 +97,8 @@ export default function ProductTable() {
         />
       </section>
 
-      
-      <section className="w-[96.5%] mx-auto mb-4 border border-black/5 rounded-xl overflow-hidden shadow-sm">
+      {/* Tabela */}
+      <section className="w-[96.5%] mx-auto mb-0 border border-black/5 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full border-separate border-spacing-0 bg-[#F2F4F6]">
           <thead className="bg-white">
             <tr>
@@ -113,8 +121,8 @@ export default function ProductTable() {
                   <td className="p-4 text-sm text-center border-b border-black/5 text-gray-600">{item.categoria || "Geral"}</td>
                   <td className="p-4 text-sm text-center border-b border-black/5">{item.quantity}</td>
                   <td className="p-4 text-sm text-center border-b border-black/5">{item.min}</td>
-                  <td className="p-4 text-center  align-middle border-b border-black/5 ">
-                    <span className={` px-3 py-1 rounded-full max-w-30 inline-flex justify-center  font-bold text-[10px] uppercase ${getStatusStyles(currentStatus)}`}>
+                  <td className="p-4 text-center align-middle border-b border-black/5 ">
+                    <span className={` px-3 py-1 rounded-full max-w-30 inline-flex justify-center font-bold text-[10px] uppercase ${getStatusStyles(currentStatus)}`}>
                       {currentStatus}
                     </span>
                   </td>
@@ -132,25 +140,53 @@ export default function ProductTable() {
         </table>
       </section>
 
-      {/* Paginação */}
-      <div className="flex justify-end items-center gap-4 p-4 border-t border-black/5">
-        <button
-          disabled={pagina === 0}
-          onClick={() => setPagina(pagina - 1)}
-          className="px-4 py-1 border border-black/20 rounded text-sm font-medium disabled:opacity-30 hover:bg-gray-50"
-        >
-          Anterior
-        </button>
-        <span className="text-xs text-gray-500 font-medium">
-          {pagina + 1} de {totalPaginas}
-        </span>
-        <button
-          disabled={pagina + 1 >= totalPaginas}
-          onClick={() => setPagina(pagina + 1)}
-          className="px-4 py-1 border border-black/20 rounded text-sm font-medium disabled:opacity-30 hover:bg-gray-50 mr-4"
-        >
-          Próxima
-        </button>
+      <div className="flex justify-between items-center w-[96.5%] mx-auto p-4 bg-white  mt-0 mb-4 ">
+
+        {/* Esquerda: Select */}
+        <div className="flex items-center gap-3">
+          <label htmlFor="quantidade" className="text-sm font-medium text-gray-700">
+            Exibir:
+          </label>
+          <Select value={quantidade.toString()} onValueChange={handleQuantidadeChange}>
+            <SelectTrigger className="w-[110px] bg-white h-9 border-gray-300">
+              <SelectValue placeholder="Selecione" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5 linhas</SelectItem>
+              <SelectItem value="10">10 linhas</SelectItem>
+              <SelectItem value="15">15 linhas</SelectItem>
+              <SelectItem value="20">20 linhas</SelectItem>
+              <SelectItem value="50">50 linhas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Centro: Informação de registros */}
+        <div className="text-sm  text-gray-500">
+          Mostrando {listaProdutos.length} de {totalElementos} produtos
+        </div>
+
+        {/* Direita: Botões */}
+        <div className="flex items-center gap-4">
+          <button
+            disabled={pagina === 0 || isLoading}
+            onClick={() => setPagina(pagina - 1)}
+            className="px-4 py-1.5 border border-black/20 rounded-md text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+          >
+            Anterior
+          </button>
+          <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center">
+            {pagina + 1} de {totalPaginas || 1}
+          </span>
+          <button
+            disabled={pagina + 1 >= totalPaginas || isLoading}
+            onClick={() => setPagina(pagina + 1)}
+            className="px-4 py-1.5 border border-black/20 rounded-md text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+          >
+            Próxima
+          </button>
+        </div>
+
       </div>
     </section>
   );

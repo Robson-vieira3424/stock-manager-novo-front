@@ -9,7 +9,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress"
 import { TrendingUp } from "lucide-react"
-export default function Progresso() {
+interface taxaRecuperacaoProps{
+    data:number;
+}
+export default function Progresso({data}:taxaRecuperacaoProps) {
 
     return (
 
@@ -26,11 +29,11 @@ export default function Progresso() {
 
                         <Label htmlFor="progress-upload">Recuperados vs Baixados</Label>
 
-                        <span className="ml-auto">66%</span>
+                        <span className="ml-auto">{data}%</span>
 
                     </div>
 
-                    <Progress value={66} id="progress-upload" className="w-full h-3.5 [&>*]:bg-blue-600 bg-gray-200" />
+                    <Progress value={data} id="progress-upload" className="w-full h-3.5 [&>*]:bg-blue-600 bg-gray-200" />
 
                 </div>
             </CardContent>

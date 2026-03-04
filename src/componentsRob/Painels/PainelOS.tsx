@@ -5,9 +5,11 @@ import { manutecaoDTO } from "@/types/manutencaoDTO";
 
 interface ManutencoesPainelProps {
     data: manutecaoDTO[];
+    onEdit?: (id: number) => void;
+    onView?: (id: number) => void;
 }
 
-export default function PainelOs({ data }: ManutencoesPainelProps) {
+export default function PainelOs({ data, onEdit, onView }: ManutencoesPainelProps) {
 
     const renderContent = (filtroStatus: string | null) => {
 
@@ -20,7 +22,7 @@ export default function PainelOs({ data }: ManutencoesPainelProps) {
         }
 
         return itensFiltrados.map((manutencao) => (
-            <CardManutencao key={manutencao.id} data={manutencao} />
+            <CardManutencao key={manutencao.id} data={manutencao} onEdit={onEdit} onView={onView} />
         ));
     };
 

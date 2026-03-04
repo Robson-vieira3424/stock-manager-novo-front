@@ -122,7 +122,7 @@ export default function MapeamentoPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {secretarias.map((sec, index) => {
-                            // 3. Escolhendo a cor baseada no index/ID para manter a estabilidade (parece aleatório, mas não pisca)
+                        
                             const themeIndex = (sec.id || index) % colorThemes.length;
                             const selectedTheme = colorThemes[themeIndex];
 
@@ -133,8 +133,8 @@ export default function MapeamentoPage() {
                                     className="cursor-pointer hover:opacity-80 transition-opacity"
                                 >
                                     <CardSecretaria
-                                        nome={sec.nomeSecretaria}
-                                        icon={getIconByNome(sec.nomeSecretaria)}
+                                        nome={sec.nome}
+                                        icon={getIconByNome(sec.nome)}
                                         colorTheme={selectedTheme}
                                     />
                                 </div>

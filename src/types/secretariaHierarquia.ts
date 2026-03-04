@@ -1,9 +1,8 @@
 import { Departamento } from "./departamento";
 
-export type Secretaria = {
+export type SecretariaHierarquia = {
     id:number;
-    nome:string;
+    nomeSecretaria:string;
     departamentos: Departamento[];
 }
-
 

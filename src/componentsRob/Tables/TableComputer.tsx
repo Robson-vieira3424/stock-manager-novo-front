@@ -4,8 +4,16 @@ import { FiCpu } from "react-icons/fi";
 import { BiMap } from "react-icons/bi";
 import { FaMemory } from "react-icons/fa";
 import { MdStorage } from "react-icons/md";
-import { Button } from "@/components/ui/button";
-import api from "@/services/api"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import api from "@/services/api";
+
 interface ComputadorDTO {
   id: string | number;
   patrimonio: string;
@@ -15,7 +23,6 @@ interface ComputadorDTO {
   memoria: string;
   armazenamento: string;
   statusEquipamento: string;
-
 }
 
 interface EstacaoTrabalhoDTO {
@@ -36,17 +43,14 @@ export default function TableComputador() {
     try {
       setLoading(true);
       const response = await api.get("/estacao");
-      const result =  response.data;
-      console.log("Estações: ", result)
+      const result = response.data;
       setData(result);
-      console.log("dados de estacao recebidos:", result);
-
-
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
-     
-    }finally{ setLoading(false);}
-  };
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     getEstacoesWork();
@@ -65,51 +69,109 @@ export default function TableComputador() {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  // --- Helpers de Estilo e Lógica ---
+  // --- Helpers de Estilo ---
 
- const getTipoComputador = (modelo: string = "") => {
-    const mod = (modelo || "").toLowerCase();
-    if (mod.includes("xps")) return { label: "Dell XPS", style: "border-[#39d6f2] text-[#39d6f2] bg-[#e6f8fb]" };
-    if (mod.includes("all-in-one")) return { label: "All-in-One", style: "border-[#0080ff] text-[#0080ff] bg-[#deeeff]" };
-    if (mod.includes("thinkcenter")) return { label: "ThinkCentre", style: "border-[#ef4444] text-[#ef4444] bg-[#ffd8d2]" };
-    return { label: "Genérico", style: "border-[#a855f7] text-[#a855f7] bg-[#f6eefe]" };
+  const getTipoComputador = (modelo: string = "") => {
+    const mod = modelo.toLowerCase();
+    // Diminuído o px, py, text e min-w
+    const baseStyle =
+      "px-[8px] py-[2px] border min-w-[140px] flex flex-wrap rounded-[16px] justify-center text-[14px] font-normal m-0 ";
+
+    if (mod.includes("xps")) {
+      return {
+        label: "Dell XPS",
+        style: baseStyle + "border-[#39d6f2] text-[#39d6f2] bg-[#e6f8fb]",
+      };
+    }
+    if (mod.includes("all-in-one")) {
+      return {
+        label: "All-in-One",
+        style: baseStyle + "border-[#0080ff] text-[#0080ff] bg-[#deeeff]",
+      };
+    }
+    if (mod.includes("thinkcentre") || mod.includes("lenovo")) {
+      return {
+        label: "ThinkCentre",
+        style: baseStyle + "border-[#ef4444] text-[#ef4444] bg-[#ffd8d2]",
+      };
+    }
+    return {
+      label: "Genérico",
+      style: baseStyle + "border-[#a855f7] text-[#a855f7] bg-[#f6eefe]",
+    };
   };
 
   const getStatusStyle = (status: string = "") => {
-    const s = status.trim();
-    if (s === "EM_USO" || s === "EM__USO") {
-      return { label: "Em Uso", style: "text-emerald-500 border-emerald-500 bg-emerald-100" };
+    const s = status.trim().toUpperCase();
+    // Diminuído o px, py, text e min-w
+    const baseStyle =
+      "px-[12px] py-[2px] border min-w-[90px] inline-flex flex-wrap rounded-[16px] justify-center text-[12px] font-medium mx-auto ";
+
+    if (s === "ATIVO" || s === "EM_USO" || s === "EM__USO") {
+      return {
+        label: "Em Uso",
+        style: baseStyle + "text-[#10b981] border-[#10b981] bg-[#d1fae5]",
+      };
     }
-    if (s === "MANUTENCAO") {
-      return { label: "Manutenção", style: "text-amber-500 border-amber-500 bg-amber-100" };
+    if (s === "MANUTENCAO" || s === "EM MANUTENÇÃO") {
+      return {
+        label: "Manutenção",
+        style: baseStyle + "text-[#f59e0b] border-[#f59e0b] bg-[#fef3c7]",
+      };
     }
-    if (s === "DEFEITO") {
-      return { label: "Defeito", style: "text-red-500 border-red-500 bg-red-100" };
+    if (s === "INATIVO" || s === "DEFEITO") {
+      return {
+        label: "Defeito",
+        style: baseStyle + "text-[#ef4444] border-[#ef4444] bg-[#fee2e2]",
+      };
     }
-    return { label: "Disponível", style: "text-blue-400 border-blue-400 bg-blue-50" };
+    return {
+      label: "Disponível",
+      style: baseStyle + "text-[#60a5fa] border-[#60a5fa] bg-[#e0f2fe]",
+    };
   };
 
   if (loading && data.length === 0) {
-    return <div className="p-10 text-center text-gray-500">Carregando dados...</div>;
+    return <div className="p-10 text-center text-slate-500 font-sans">Carregando dados...</div>;
   }
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-lg border border-slate-200 shadow-sm">
-      <div className="w-full mx-auto overflow-auto">
-        <table className="w-full text-sm text-left">
-          {/* Cabeçalho Moderno */}
-          <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-6 py-4 font-semibold">Patrimônio</th>
-              <th className="px-6 py-4 font-semibold">Equipamento</th>
-              <th className="px-6 py-4 font-semibold text-center">Tipo</th>
-              <th className="px-6 py-4 font-semibold">Specs (CPU / RAM / ROM)</th>
-              <th className="px-6 py-4 font-semibold">Localização</th>
-              <th className="px-6 py-4 font-semibold text-center">Status</th>
-            </tr>
-          </thead>
+    <section className="shadow-[0px_10px_30px_rgba(0,0,0,0.1)] w-full mx-auto my-8 rounded-2xl animate-tableFadeIn font-sans bg-white">
 
-          <tbody className="divide-y divide-slate-100">
+      {/* Header Visual */}
+      <section className="flex justify-between items-center mx-auto h-[5.5rem] w-[96.5%]">
+        <h1 className="text-[1.4rem] capitalize font-semibold text-gray-800">
+          Estações de Trabalho
+        </h1>
+      </section>
+
+      {/* Container da Tabela com Borda e Sombra Interna */}
+      <section className="w-[96.5%] mx-auto mb-0 border border-black/5 rounded-xl overflow-hidden shadow-sm">
+        <Table className="w-[99%] bg-[#F2F4F6] border-separate border-spacing-0">
+          <TableHeader className="bg-white">
+            <TableRow className="hover:bg-transparent border-none">
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Patrimônio
+              </TableHead>
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Equipamento
+              </TableHead>
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Tipo
+              </TableHead>
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Componentes
+              </TableHead>
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Localização
+              </TableHead>
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+                Status
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
             {currentData.map((estacao) => {
               const pc = estacao.computador;
               if (!pc) return null;
@@ -118,107 +180,112 @@ export default function TableComputador() {
               const statusInfo = getStatusStyle(pc.statusEquipamento);
 
               return (
-                <tr key={estacao.id} className="hover:bg-slate-50 transition-colors">
+                <TableRow
+                  key={estacao.id}
+                  className="bg-white transition-all hover:bg-gray-50/50 hover:scale-[1.001] border-none"
+                >
+                  {/* 1. Patrimônio */}
+                  <TableCell className="p-4 text-sm text-center border-b border-black/5 font-semibold text-[#0066ffda] align-middle">
+                    {pc.patrimonio}
+                  </TableCell>
 
-                  {/* 1. Patrimônio Tech Style */}
-                  <td className="px-6 py-4 align-middle">
-                    <span className="font-mono text-xs font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded border border-slate-200">
-                      {pc.patrimonio}
-                    </span>
-                  </td>
-
-                  {/* 2. Equipamento Limpo */}
-                  <td className="px-6 py-4 align-middle">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-slate-900">{pc.nome}</span>
-                      <span className="text-xs text-slate-500">{pc.modelo}</span>
-                    </div>
-                  </td>
-
-                  {/* 3. Badge de Tipo Moderno */}
-                  <td className="px-6 py-4 align-middle text-center">
-                    {/* Note que removi o min-w fixo e usei cores mais suaves via classes Tailwind padrão se possível */}
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${tipoInfo.style}`}>
-                     {tipoInfo.label}
-                    </span>
-                  </td>
-
-                  {/* 4. Componentes em Linha (Mais fácil de ler) */}
-                  <td className="px-6 py-4 align-middle">
-                    <div className="flex items-center gap-3 text-slate-600">
-                      <div className="flex items-center gap-1.5" title="Processador">
-                        <FiCpu className="w-4 h-4 text-slate-400" />
-                        <span className="text-xs">{pc.processador}</span>
+                  {/* 2. Equipamento */}
+                  <TableCell className="p-4 align-middle border-b border-black/5">
+                    <div className="flex flex-col gap-[6px] items-center text-center">
+                      <div className="font-semibold text-black/90 text-[15px]">
+                        {pc.nome}
                       </div>
-                      <div className="h-4 w-px bg-slate-300"></div> {/* Divisor Vertical */}
-                      <div className="flex items-center gap-1.5" title="Memória">
-                        <FaMemory className="w-4 h-4 text-slate-400" />
-                        <span className="text-xs">{pc.memoria}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5" title="Armazenamento">
-                        <MdStorage className="w-4 h-4 text-slate-400" />
-                        <span className="text-xs">{pc.armazenamento}</span>
+                      <div className="font-medium text-black/50 text-[13px]">
+                        {pc.modelo}
                       </div>
                     </div>
-                  </td>
+                  </TableCell>
 
-                  {/* 5. Localização Hierárquica (Sem ícone gigante) */}
-                  <td className="px-6 py-4 align-middle">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-slate-900">{estacao.setor}</span>
-                      <div className="flex items-center gap-1 text-[14px] text-slate-500">
-                        <BiMap className="w-5 h-5" />
-                        {estacao.localizacao}
+                  {/* 3. Tipo */}
+                  <TableCell className="p-2 align-middle border-b border-black/5">
+                    <div className="flex justify-center">
+                      <section className={tipoInfo.style}>
+                        {tipoInfo.label}
+                      </section>
+                    </div>
+                  </TableCell>
+
+                  {/* 4. Componentes */}
+                  <TableCell className="p-4 align-middle border-b border-black/5">
+                    <div className="flex flex-col gap-[6px] items-center">
+                      <div className="w-full text-black/90 text-[13px] font-medium flex justify-center items-center gap-[4px]">
+                        <FiCpu fontSize={14} color="rgba(0, 0, 0, 0.5)" />
+                        {pc.processador}
+                      </div>
+                      <div className="flex text-[13px] font-medium text-black/80 items-center justify-center gap-[6px] w-full">
+                        <FaMemory fontSize={14} color="rgba(0, 0, 0, 0.5)" />
+                        {pc.memoria}
+                        <MdStorage fontSize={14} color="rgba(0, 0, 0, 0.5)" className="ml-1" />
+                        {pc.armazenamento}
                       </div>
                     </div>
-                  </td>
+                  </TableCell>
 
-                  {/* Status Badge */}
-                  <td className="px-6 py-4 align-middle text-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusInfo.style}`}>
+                  {/* 5. Localização */}
+                  <TableCell className="p-4 align-middle border-b border-black/5">
+                    <div className="flex flex-row items-center justify-center gap-[12px] w-full max-w-[250px] mx-auto">
+                      <BiMap fontSize={20} color="#00000099" className="flex-shrink-0" />
+                      <div className="flex flex-col overflow-hidden text-left">
+                        <span className="text-[15px] font-medium text-black/90 whitespace-nowrap overflow-hidden text-ellipsis">
+                          {estacao.secretaria}
+                        </span>
+                        <span className="text-[12px] text-black/50 whitespace-nowrap overflow-hidden text-ellipsis">
+                          {estacao.setor}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+
+                  {/* 6. Status */}
+                  <TableCell className="p-4 text-center align-middle border-b border-black/5">
+                    <div className={statusInfo.style}>
                       {statusInfo.label}
-                    </span>
-                  </td>
-
-                </tr>
+                    </div>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </section>
 
-      {/* Paginação mantida, apenas ajuste as bordas para combinar */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-lg">
-        <div className="flex justify-between items-center w-full mt-6 pt-4 border-t border-slate-200">
-          <div className="text-[0.875rem] text-[#64748b] flex-1">
-            Página {currentPage} de {totalPages || 1}
-          </div>
+      {/* Paginação Estilo Controle de Estoque */}
+      <div className="flex justify-between items-center w-[96.5%] mx-auto p-4 bg-white mt-0 mb-4 rounded-b-2xl">
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 font-medium"
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
+        {/* Info de registros */}
+        <div className="text-sm text-gray-500 font-medium">
+          Mostrando {currentData.length === 0 ? 0 : startIndex + 1} a {Math.min(endIndex, data.length)} de {data.length} estações
+        </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 font-medium"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages || totalPages === 0}
-            >
-              Próximo
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+        {/* Botões */}
+        <div className="flex items-center gap-4">
+          <button
+            disabled={currentPage === 1 || loading}
+            onClick={goToPreviousPage}
+            className="px-4 py-1.5 border border-black/20 rounded-md text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-gray-700"
+          >
+            Anterior
+          </button>
+
+          <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center">
+            {currentPage} de {totalPages === 0 ? 1 : totalPages}
+          </span>
+
+          <button
+            disabled={currentPage === totalPages || totalPages === 0 || loading}
+            onClick={goToNextPage}
+            className="px-4 py-1.5 border border-black/20 rounded-md text-sm font-medium disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-gray-700"
+          >
+            Próxima
+          </button>
         </div>
       </div>
-    </div>
+
+    </section>
   );
 }

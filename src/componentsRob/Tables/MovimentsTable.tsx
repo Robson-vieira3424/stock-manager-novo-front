@@ -1,8 +1,9 @@
 import formatarData from "@/utils/formatDate";
-import { FileEdit } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileEdit } from "lucide-react";
 import { useEffect, useState } from "react";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import api from "../../services/api"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 type Movimentacao = {
   id: number;
   moveDate: string;
@@ -20,16 +21,23 @@ export default function MovimentsTable() {
   const [listaMovimentacoes, setListaMovimentacoes] = useState<Movimentacao[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [pagina, setPagina] = useState(0); // O Spring começa na página 0
+  const [quantidade, setQuantidade] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
   const fetchMovimentacoes = async () => {
+    setLoading(true);
     try {
-      // Substituindo Axios por Fetch
-      const response = await api.get("/moviments");
+      const response = await api.get(
+        `/moviments?pagina=${pagina}&quantidade=${quantidade}&ordem=moveDate&direcao=DESC`
+      );
 
+      const data = response.data;
 
-
-      const data = await response.data;
-      setListaMovimentacoes(data);
-      console.log(data);
+      setListaMovimentacoes(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
     } catch (error) {
       console.error("Erro ao buscar movimentacoes:", error);
     } finally {
@@ -38,8 +46,12 @@ export default function MovimentsTable() {
   };
   useEffect(() => {
     fetchMovimentacoes();
-  }, []);
+  }, [pagina, quantidade]);
 
+  const handleQuantidadeChange = (value: string) => {
+    setQuantidade(Number(value));
+    setPagina(0);
+  };
   return (
     <>
 
@@ -50,6 +62,7 @@ export default function MovimentsTable() {
           <h1 className="m-0 p-0 text-[1.4rem] font-semibold capitalize">
             histórico de movimentações
           </h1>
+          
           <input
             type="text"
             className="w-80 rounded-lg border border-black/10 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -123,6 +136,52 @@ export default function MovimentsTable() {
               ))}
             </tbody>
           </table>
+          <div className="flex items-center justify-between bg-white px-6 py-4 border-t border-black/[0.04]">
+            
+            <div className="flex items-center gap-2">
+              <label htmlFor="quantidade" className="text-sm font-medium text-gray-700">
+                Exibir:
+              </label>
+              <Select value={quantidade.toString()} onValueChange={handleQuantidadeChange}>
+                <SelectTrigger className="w-[110px] bg-white h-9">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 linhas</SelectItem>
+                  <SelectItem value="10">10 linhas</SelectItem>
+                  <SelectItem value="20">20 linhas</SelectItem>
+                  <SelectItem value="50">50 linhas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <span className="text-sm text-gray-500">
+              Mostrando {listaMovimentacoes.length} de {totalElements} registros
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPagina((prev) => Math.max(prev - 1, 0))}
+                disabled={pagina === 0 || loading}
+                className="flex items-center justify-center rounded-lg border border-gray-300 p-2 text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <span className="text-sm font-medium text-gray-700">
+                Página {pagina + 1} de {totalPages || 1}
+              </span>
+
+              <button
+                onClick={() => setPagina((prev) => Math.min(prev + 1, totalPages - 1))}
+                disabled={pagina >= totalPages - 1 || loading}
+                className="flex items-center justify-center rounded-lg border border-gray-300 p-2 text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+
         </section>
       </section>
     </>

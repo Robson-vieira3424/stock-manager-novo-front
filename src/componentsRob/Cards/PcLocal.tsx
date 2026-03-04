@@ -11,12 +11,12 @@ export default function PcLocal({ departamento }: PcLocalProps) {
       
         <Card className="w-full md:w-[48%] lg:w-[30%] h-fit">
             <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                <div className="flex flex-shrink-0 h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                     <Monitor className="h-6 w-6" />
                 </div>
 
-                <section>
-                    <CardTitle className="text-lg uppercase">
+                <section className="flex-1 min-w-0">
+                    <CardTitle className="text-lg uppercase truncate">
                         {departamento.nomeDepartamento}
                     </CardTitle>
                     <CardDescription>

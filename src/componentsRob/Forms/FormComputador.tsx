@@ -110,6 +110,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
   const [setores, setSetores] = useState<{ id: number; nome: string }[]>([]);
   const [memoriasGenericas, setMemoriasGenericas] = useState<Produto[]>([]);
   const [processadoresGenericos, setProcessadoresGenericos] = useState<Produto[]>([]);
+  const [loading, setLoading] = useState(false);
   const mostrarPerifericos =
     cardSelecionado !== null && cardSelecionado !== "allinone";
 
@@ -194,7 +195,9 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       console.log("Erro ao buscar processadores:", erro);
     }
   }
+ 
   async function onSubmit(values: FormValues) {
+    setLoading(true)
     if (!cardSelecionado) {
       alert("Por favor, selecione o tipo de equipamento (Card) no topo.");
       return;
@@ -242,19 +245,20 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     };
 
     try {
-      // POST com AXIOS: URL e Payload direto. Sem headers manuais.
       await api.post("/estacao", payload);
       console.log("Estação enviada", payload);
       toast.success("Equipamento cadastrado com sucesso!");
       
       form.reset();
       onClose();
-
+      
     } catch (error) {
       console.error("Erro ao cadastrar", error);
 
       const msgErro = error.response?.data?.message || "Erro ao salvar no servidor.";
       toast.error(msgErro);
+    }finally{
+      setLoading(false);
     }
   }
   useEffect(() => {
@@ -669,6 +673,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
           </button>
           <button
             type="submit"
+            disabled={loading}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
           >
             Cadastrar
