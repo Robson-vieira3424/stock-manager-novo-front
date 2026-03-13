@@ -10,6 +10,7 @@ import api from "@/services/api"
 import FormAtualizarManutencao from "@/componentsRob/Forms/FormAtualizarManutencao";
 import FormVisualizarManutencao from "@/componentsRob/Forms/FormVisualizarManutencao";
 import { CardsManutencao } from "@/types/cardsManutecao";
+import ProgressDTO from "@/types/progress";
 
 export default function ManutencaoPage() {
     const [modalAberto, setModalAberto] = useState(false);
@@ -20,7 +21,7 @@ export default function ManutencaoPage() {
     const [modalAtualizarAberto, setModalAtualizarAberto] = useState(false);
     const [manutencaoEmEdicao, setManutencaoEmEdicao] = useState<manutecaoDTO | null>(null);
     const [infoCards, setInfoCards] = useState<CardsManutencao | null>(null);
-    const [taxaRecuperacao, setTaxaRecuperacao] = useState(0);
+    const [taxaRecuperacao, setTaxaRecuperacao] = useState<ProgressDTO>();
     async function getManutencoes() {
 
         try {
@@ -62,9 +63,9 @@ export default function ManutencaoPage() {
     async function handleTaxaRecuperacao() {
         try{
         setLoading(true);
-        const response = await api.get("/manutencao/taxaRecuperação");
+        const response = await api.get("/manutencao/taxaRecuperacao");
         setTaxaRecuperacao(response.data);
-        console.log("Taxa de reciperação atual :", response.data);
+        console.log("Taxa de recuperação atual :", response.data);
     }catch(error){
         console.log("Erro ao buscar Taxa de recuperação :", error);
     }
@@ -103,9 +104,8 @@ export default function ManutencaoPage() {
 
             <PainelManutencao data={infoCards}
             />
-            <Progresso
-            data={taxaRecuperacao}
-            />
+           
+            {taxaRecuperacao && <Progresso data={taxaRecuperacao} />}
 
             <FormManutencao
                 open={modalAberto}

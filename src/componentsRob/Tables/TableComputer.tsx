@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FiCpu } from "react-icons/fi";
 import { BiMap } from "react-icons/bi";
 import { FaMemory } from "react-icons/fa";
@@ -162,10 +161,10 @@ export default function TableComputador() {
               <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
                 Componentes
               </TableHead>
-              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center w-[250px]">
                 Localização
               </TableHead>
-              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center">
+              <TableHead className="px-3 py-4 text-gray-600 font-medium text-[16px] border-b border-black/5 text-center w-[120px]" >
                 Status
               </TableHead>
             </TableRow>
@@ -192,7 +191,7 @@ export default function TableComputador() {
                   {/* 2. Equipamento */}
                   <TableCell className="p-4 align-middle border-b border-black/5">
                     <div className="flex flex-col gap-[6px] items-center text-center">
-                      <div className="font-semibold text-black/90 text-[15px]">
+                      <div className="font-semibold text-black/90 text-[14px]">
                         {pc.nome}
                       </div>
                       <div className="font-medium text-black/50 text-[13px]">
@@ -228,15 +227,12 @@ export default function TableComputador() {
 
                   {/* 5. Localização */}
                   <TableCell className="p-4 align-middle border-b border-black/5">
-                    <div className="flex flex-row items-center justify-center gap-[12px] w-full max-w-[250px] mx-auto">
-                      <BiMap fontSize={20} color="#00000099" className="flex-shrink-0" />
-                      <div className="flex flex-col overflow-hidden text-left">
-                        <span className="text-[15px] font-medium text-black/90 whitespace-nowrap overflow-hidden text-ellipsis">
-                          {estacao.secretaria}
-                        </span>
-                        <span className="text-[12px] text-black/50 whitespace-nowrap overflow-hidden text-ellipsis">
-                          {estacao.setor}
-                        </span>
+                    <div className="flex flex-col gap-[2px] items-center text-center">
+                      <div className="font-semibold text-gray-800 text-[14px]">
+                        {estacao.secretariaName || "-"}
+                      </div>
+                      <div className="font-medium text-gray-500 text-[13px]">
+                        {estacao.departamentoName || "-"}
                       </div>
                     </div>
                   </TableCell>

@@ -7,7 +7,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@/components/ui/sidebar";
-import { ArrowLeftRight, Box, LayoutDashboard, MapPinned, Monitor, Package, Wrench,  } from "lucide-react"; // Removido 'Sidebar' daqui
+import { ArrowLeftRight, Box, LayoutDashboard, MapPinned, MessageSquarePlus, Monitor, Package, Wrench,  } from "lucide-react"; // Removido 'Sidebar' daqui
+import { title } from "process";
+import { ur } from "zod/v4/locales";
+import { url } from "inspector";
 export default function AppSidebar() {
   const menuItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -16,6 +19,7 @@ export default function AppSidebar() {
     { title: "Computadores", url: "/computadores", icon: Monitor },
     { title: "Manutenção", url: "/manutencao", icon: Wrench  },
     { title: "Mapeamento", url: "/mapeamento", icon: MapPinned  },
+    { title: "Feedback", url: "/feedbacks", icon: MessageSquarePlus }
   ] 
 
   const location = useLocation(); 
@@ -42,7 +46,7 @@ export default function AppSidebar() {
 
     {/* MENU */}
     <div className="flex-1 pt-4">
-      <SidebarMenu>
+            <SidebarMenu className="px-2.5">
         {menuItems.map((item) => {
           const isActive = pathname === item.url;
 

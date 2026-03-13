@@ -11,6 +11,9 @@ import MapeamentoPage from "@/pages/protected/mapeamento/Mapeamento"
 import ManutencaoPage from "@/pages/protected/manutencao/Manutencao"
 import EstoquePage from "@/pages/protected/estoque/Estoque"
 import DetalhesSecretaria from "@/pages/protected/detalheSec/DetalhesSec"
+import FeedbackPage from "@/pages/protected/feedback/Feedback"
+import { User } from "lucide-react"
+import StudyPlanner from "@/pages/protected/Carol/Carol"
 
 const router = createBrowserRouter([
   {
@@ -50,7 +53,10 @@ const router = createBrowserRouter([
       },
       {
         path: "/produtos",
-        element: <EstoquePage />, // Notei que no path era produtos e o comp era Estoque
+        element: <EstoquePage />, 
+      },{
+        path:"/feedbacks",
+        element:<FeedbackPage/>
       },
     ]
   },

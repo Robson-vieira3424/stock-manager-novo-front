@@ -22,7 +22,7 @@ interface Departamento {
 interface Secretaria {
   id: number;
   nome: string;
-  departamentos: Departamento[];
+  departamento: Departamento[];
 }
 
 interface FormMovimentsProps {
@@ -62,23 +62,18 @@ export default function FormMoviments({ onClose }: FormMovimentsProps) {
 
   // 2. Envio do Formulário
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
+    const form = new FormData(e.currentTarget)
+    const currentAmount = form.get("amount")
 
-    const form = new FormData(e.currentTarget);
-    
-    // Pegando valores
-    const currentProductId = form.get("productId");
-    const currentAmount = form.get("amount");
-    
-    // Validação básica
-    if (!currentProductId || !currentAmount) {
-      alert("Por favor, preencha os campos obrigatórios.");
-      return;
+    if (!selectedProductId || !currentAmount) {
+      alert("Por favor, preencha os campos obrigatórios.")
+      return
     }
 
     if (tipoMovimentacao === "OUTPUT" && !selectedSecretariaId) {
-       alert("Para saídas, a secretaria é obrigatória.");
-       return;
+      alert("Para saídas, a secretaria é obrigatória.")
+      return
     }
 
    const payload = {
@@ -104,17 +99,12 @@ export default function FormMoviments({ onClose }: FormMovimentsProps) {
 
   // Handler para mudança de secretaria (Limpa o departamento)
   const handleSecretariaChange = (value: string) => {
-    const novoId = value; // O valor já vem pronto aqui
-    setSelectedSecretariaId(novoId);
-    
-    // Reseta o departamento ao trocar a secretaria
-    setSelectedDepartamentoId(""); 
-    
-    // Busca os departamentos da secretaria selecionada
-    const sec = listSecretarias.find(s => s.id.toString() === novoId);
-    setDepartamentosOpcoes(sec ? sec.departamentos : []);
-}
+    setSelectedSecretariaId(value)
+    setSelectedDepartamentoId("")
 
+    const sec = listSecretarias.find(s => s.id.toString() === value)
+    setDepartamentosOpcoes(sec?.departamento ?? []) // ?? [] evita o undefined
+  }
   // Classes reutilizáveis para manter o código limpo
   const labelClass = "block text-sm font-semibold text-gray-800 mb-1";
   const inputClass = "w-full p-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all";

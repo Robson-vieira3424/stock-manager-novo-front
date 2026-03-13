@@ -17,8 +17,26 @@ const api = axios.create({
 });
 */
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      Cookies.remove("token");
+      localStorage.removeItem("user_data");
+
+      toast.error("Sua sessão expirou. Redirecionando para o login...", {
+        duration: 3000,
+      });
+
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 3000); // aguarda o toast antes de redirecionar
+    }
+
+    return Promise.reject(error);
+  }
+);
 api.interceptors.request.use((config) => {
-  // Pega o token do Cookie (mesmo lugar onde o AuthContext salvou)
   const token = Cookies.get("token"); 
   
   if (token) {

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Eye, Monitor, User, Calendar, AlertTriangle } from "lucide-react";
+import { Eye, Monitor, User, Calendar, AlertTriangle, MapPin, Cpu } from "lucide-react";
 import { manutecaoDTO } from "@/types/manutencaoDTO";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,16 +23,15 @@ interface FormVisualizarManutencaoProps {
 export default function FormVisualizarManutencao({ open, onOpenChange, manutencao }: FormVisualizarManutencaoProps) {
     if (!manutencao) return null;
 
-    // Formata a data se existir
     const dataFormatada = manutencao.dataPrevisao
-        ? format(new Date(manutencao.dataPrevisao), "dd/MM/yyyy", { locale: ptBR })
+        ? format(new Date(manutencao.dataPrevisao), "PPP", { locale: ptBR })
         : "Não definida";
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[700px] max-h-[85vh] flex flex-col">
+            <DialogContent className="sm:max-w-[650px] max-h-[85vh] flex flex-col">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-xl">
+                    <DialogTitle className="flex items-center gap-2">
                         <Eye className="h-5 w-5 text-blue-600" />
                         Detalhes da Manutenção
                     </DialogTitle>
@@ -41,75 +40,107 @@ export default function FormVisualizarManutencao({ open, onOpenChange, manutenca
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4 overflow-y-auto px-1">
+                <div className="space-y-6 py-4 overflow-y-auto px-4">
 
-                    {/* SEÇÃO 1: Dados do Equipamento */}
-                    <div className="p-4 bg-slate-50 border rounded-lg space-y-4">
-                        <h3 className="font-semibold text-slate-700 flex items-center gap-2 border-b pb-2">
-                            <Monitor className="h-4 w-4" /> Dados do Equipamento
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="flex flex-col gap-1.5 md:col-span-2">
-                                <Label>Nome / Localização</Label>
-                                <Input readOnly value={`${manutencao.pc?.nome || ''} - ${manutencao.pc?.localizacao || ''}`} className="bg-white" />
+                    {/* Computador selecionado — mesmo card do FormManutencao */}
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-2 items-center text-sm font-medium">
+                            <Monitor className="h-4 w-4" />
+                            <Label>Computador</Label>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg shadow-sm bg-white">
+                            <div className="flex items-center gap-4">
+                                <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <Monitor className="h-6 w-6" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-lg text-gray-900 leading-none mb-1">
+                                        {manutencao.pc?.nome || "PC Desconhecido"}
+                                    </span>
+                                    <span className="text-sm text-gray-500">
+                                        Patrimônio: {manutencao.pc?.patrimonio || "N/A"}
+                                    </span>
+                                    <span className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                                        <MapPin className="h-3 w-3" /> {manutencao.pc?.localizacao || "—"}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-1.5">
-                                <Label>Patrimônio</Label>
-                                <Input readOnly value={manutencao.pc?.patrimonio || 'N/A'} className="bg-white font-mono" />
-                            </div>
-                            <div className="flex flex-col gap-1.5 md:col-span-3">
-                                <Label>Especificações</Label>
-                                <Input
-                                    readOnly
-                                    value={[manutencao.pc?.processador, manutencao.pc?.memoria, manutencao.pc?.armazenamento].filter(Boolean).join(" | ") || "Sem especificações cadastradas"}
-                                    className="bg-white text-xs"
-                                />
-                            </div>
+                            {manutencao.pc?.processador && (
+                                <span className="text-xs text-slate-500 flex items-center gap-1 hidden md:flex">
+                                    <Cpu className="h-3 w-3" />
+                                    {[manutencao.pc.processador, manutencao.pc.memoria, manutencao.pc.armazenamento]
+                                        .filter(Boolean).join(" · ")}
+                                </span>
+                            )}
                         </div>
                     </div>
 
-                    {/* SEÇÃO 2: Informações Técnicas */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Status</Label>
-                            <Input readOnly value={manutencao.status || ''} className="bg-slate-50 font-semibold" />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <Label>Prioridade</Label>
-                            <Input readOnly value={manutencao.prioridade || ''} className="bg-slate-50" />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                            <Label>Tipo</Label>
-                            <Input readOnly value={manutencao.tipo || ''} className="bg-slate-50" />
-                        </div>
+                    {/* Descrição do Problema */}
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="descricao" className="flex items-center gap-1.5">
+                            <AlertTriangle className="h-3.5 w-3.5 text-orange-500" /> Descrição do Problema
+                        </Label>
+                        <Textarea
+                            id="descricao"
+                            readOnly
+                            value={manutencao.descricaoProblema || ''}
+                            className="min-h-[100px] w-full resize-none bg-slate-50"
+                        />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="flex items-center gap-1"><User className="h-3 w-3" /> Técnico Responsável</Label>
+                    {/* Técnico + Tipo */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <Label className="flex items-center gap-1.5">
+                                <User className="h-3.5 w-3.5" /> Técnico Responsável
+                            </Label>
                             <Input readOnly value={manutencao.nomeTecnico || 'Não atribuído'} className="bg-slate-50" />
                         </div>
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="flex items-center gap-1"><Calendar className="h-3 w-3" /> Previsão de Retorno</Label>
+                        <div className="flex flex-col gap-2">
+                            <Label>Tipo de Manutenção</Label>
+                            <Input readOnly value={manutencao.tipo || '—'} className="bg-slate-50" />
+                        </div>
+                    </div>
+
+                    {/* Prioridade + Data */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-2">
+                            <Label>Prioridade</Label>
+                            <Input readOnly value={manutencao.prioridade || '—'} className="bg-slate-50" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <Label className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5" /> Previsão de Retorno
+                            </Label>
                             <Input readOnly value={dataFormatada} className="bg-slate-50" />
                         </div>
                     </div>
 
-                    {/* SEÇÃO 3: Textos e Descrições */}
-                    <div className="flex flex-col gap-1.5">
-                        <Label>Descrição do Problema Reportado</Label>
-                        <Textarea readOnly value={manutencao.descricaoProblema || ''} className="bg-slate-50 min-h-[80px] resize-none" />
+                    {/* Status */}
+                    <div className="flex flex-col gap-2">
+                        <Label>Status</Label>
+                        <Input readOnly value={manutencao.status || '—'} className="bg-slate-50 font-semibold" />
                     </div>
 
-                    <div className="flex flex-col gap-1.5">
+                    {/* Comentário do Técnico */}
+                    <div className="flex flex-col gap-2">
                         <Label>Comentário do Técnico</Label>
-                        <Textarea readOnly value={manutencao.comentarioTecnico || 'Nenhum comentário adicionado.'} className="bg-slate-50 min-h-[80px] resize-none" />
+                        <Textarea
+                            readOnly
+                            value={manutencao.comentarioTecnico || 'Nenhum comentário adicionado.'}
+                            className="min-h-[100px] w-full resize-none bg-slate-50"
+                        />
                     </div>
 
+                    {/* Observações (só exibe se tiver) */}
                     {manutencao.observacao && (
-                        <div className="flex flex-col gap-1.5">
-                            <Label>Observações Adicionais</Label>
-                            <Textarea readOnly value={manutencao.observacao} className="bg-slate-50 min-h-[60px] resize-none" />
+                        <div className="flex flex-col gap-2">
+                            <Label>Observações</Label>
+                            <Textarea
+                                readOnly
+                                value={manutencao.observacao}
+                                className="min-h-[80px] w-full resize-none bg-slate-50"
+                            />
                         </div>
                     )}
 

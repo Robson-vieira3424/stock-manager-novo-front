@@ -5,8 +5,8 @@ interface propsPageHeader {
     icon: LucideIcon;
     title: string;
     description: string;
-    buttonText: string
-    onClickButtonHeader: () => void;
+    buttonText?: string
+    onClickButtonHeader?: () => void;
 }
 export default function PageHeader({ icon: Icon, title, description, buttonText, onClickButtonHeader }: propsPageHeader) {
     return (
@@ -30,7 +30,11 @@ export default function PageHeader({ icon: Icon, title, description, buttonText,
 
 
 
-            <div onClick={onClickButtonHeader}><AddButton variant="blue" text={buttonText} /></div>
+            {buttonText && onClickButtonHeader && (
+                <div onClick={onClickButtonHeader}>
+                    <AddButton variant="blue" text={buttonText} />
+                </div>
+            )}
 
         </div>
     )
