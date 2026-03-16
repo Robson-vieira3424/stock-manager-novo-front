@@ -1,9 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import Login from "@/pages/login/Login"
 import PrivateRoutes from "./private"
-import DefaultLayout from "../layouts/defaultLayout" // Importe o layout que você criou
+import DefaultLayout from "../layouts/defaultLayout"
+import RotaProtegida from "../componentsRob/RotaProtegida/RotaProtegida"
 
-// Páginas
 import DashboardPage from "@/pages/protected/dashboard/Dashboard"
 import ComputadoresPage from "@/pages/protected/computadores/Computadores"
 import MovimentacoesPage from "@/pages/protected/movimentacoes/Movimentacoes"
@@ -12,8 +12,12 @@ import ManutencaoPage from "@/pages/protected/manutencao/Manutencao"
 import EstoquePage from "@/pages/protected/estoque/Estoque"
 import DetalhesSecretaria from "@/pages/protected/detalheSec/DetalhesSec"
 import FeedbackPage from "@/pages/protected/feedback/Feedback"
-import { User } from "lucide-react"
-import StudyPlanner from "@/pages/protected/Carol/Carol"
+import ConfiguracoesPage from "@/pages/protected/configuracoes/ConfiguracoesPage"
+
+const TODOS = ["ROLE_ADMIN", "ROLE_ESTOQUISTA", "ROLE_TECNICO", "ROLE_SUPERVISOR"];
+const SO_ADMIN = ["ROLE_ADMIN"];
+const ESTOQUE = ["ROLE_ADMIN", "ROLE_ESTOQUISTA"];
+const MANUTENCAO = ["ROLE_ADMIN", "ROLE_TECNICO"];
 
 const router = createBrowserRouter([
   {
@@ -23,42 +27,88 @@ const router = createBrowserRouter([
   {
     element: (
       <PrivateRoutes>
-        <DefaultLayout /> 
+        <DefaultLayout />
       </PrivateRoutes>
     ),
     children: [
+      // ── Todos os perfis ──────────────────────────────
       {
         path: "/dashboard",
         element: <DashboardPage />,
-      },
-      {
-        path: "/computadores",
-        element: <ComputadoresPage />,
-      },
-      {
-        path: "/movimentacoes",
-        element: <MovimentacoesPage />,
       },
       {
         path: "/mapeamento",
         element: <MapeamentoPage />,
       },
       {
-        path: "/mapeamento/:id", 
+        path: "/mapeamento/:id",
         element: <DetalhesSecretaria />,
       },
       {
-        path: "/manutencao",
-        element: <ManutencaoPage />,
+        path: "/feedbacks",
+        element: <FeedbackPage />,
       },
+
+      // ── Admin + Estoquista ───────────────────────────
       {
         path: "/produtos",
-        element: <EstoquePage />, 
-      },{
-        path:"/feedbacks",
-        element:<FeedbackPage/>
+        element: (
+          <RotaProtegida permissoesPermitidas={ESTOQUE}>
+            <EstoquePage />
+          </RotaProtegida>
+        ),
       },
-    ]
+      {
+        path: "/movimentacoes",
+        element: (
+          <RotaProtegida permissoesPermitidas={ESTOQUE}>
+            <MovimentacoesPage />
+          </RotaProtegida>
+        ),
+      },
+
+      // ── Admin + Técnico ──────────────────────────────
+      {
+        path: "/manutencao",
+        element: (
+          <RotaProtegida permissoesPermitidas={MANUTENCAO}>
+            <ManutencaoPage />
+          </RotaProtegida>
+        ),
+      },
+      {
+        path: "/computadores",
+        element: (
+          <RotaProtegida permissoesPermitidas={MANUTENCAO}>
+            <ComputadoresPage />
+          </RotaProtegida>
+        ),
+      },
+
+      // ── Só Admin ────────────────────────────────────
+      {
+        path: "/configuracoes",
+        element: (
+          <RotaProtegida permissoesPermitidas={SO_ADMIN}>
+            <ConfiguracoesPage />
+          </RotaProtegida>
+        ),
+      },
+
+      // ── Sem acesso ───────────────────────────────────
+      {
+        path: "/sem-acesso",
+        element: (
+          <div className="h-full flex flex-col items-center justify-center gap-3">
+            <h1 className="text-3xl font-bold text-gray-800">Acesso Negado</h1>
+            <p className="text-gray-500">Você não tem permissão para acessar esta página.</p>
+            <a href="/dashboard" className="text-blue-600 hover:underline text-sm">
+              Voltar ao Dashboard
+            </a>
+          </div>
+        ),
+      },
+    ],
   },
   {
     path: "*",
@@ -69,11 +119,9 @@ const router = createBrowserRouter([
         <a href="/" className="mt-4 text-blue-600 hover:underline">Voltar ao início</a>
       </div>
     ),
-  }
+  },
 ]);
 
-const Routers = () => {
-  return <RouterProvider router={router} />;
-};
+const Routers = () => <RouterProvider router={router} />;
 
 export default Routers;

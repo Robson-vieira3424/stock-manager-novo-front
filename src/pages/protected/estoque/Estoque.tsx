@@ -32,7 +32,6 @@ export default function EstoquePage() {
                 alert("Sessão expirada ou sem permissão.");
             }
         } finally {
-            // 3. O 'finally' roda SEMPRE, dando erro ou sucesso
             setIsLoading(false); 
         }
     }

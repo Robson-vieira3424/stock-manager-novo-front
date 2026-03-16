@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MeusFeedbacks from "@/componentsRob/Cards/CardMeuFeddback";
+import MeusFeedbacks from "@/componentsRob/Cards/CardMeuFeedback";
 import AddFeedback from "@/componentsRob/Forms/PainelFormAddFeedback";
 import PageHeader from "@/componentsRob/Globals/PageHeader";
 import { MessageSquarePlus } from "lucide-react";

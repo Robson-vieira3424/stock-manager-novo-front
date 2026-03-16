@@ -12,7 +12,7 @@ import {
     SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import {
-    Lightbulb, Bug, Sparkles, MoreHorizontal,
+    Lightbulb, Bug, 
     Send, MessageSquarePlus, ImagePlus, X
 } from "lucide-react";
 import api from "@/services/api";
@@ -30,14 +30,12 @@ export default function AddFeedback() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Valida tipo
         const tiposPermitidos = ["image/jpeg", "image/png", "image/gif", "image/webp"];
         if (!tiposPermitidos.includes(file.type)) {
             alert("Formato inválido. Use JPG, PNG, GIF ou WEBP.");
             return;
         }
 
-        // Valida tamanho (máx 5MB)
         if (file.size > 5 * 1024 * 1024) {
             alert("A imagem deve ter no máximo 5MB.");
             return;
@@ -59,6 +57,12 @@ export default function AddFeedback() {
             return;
         }
 
+        const userData = JSON.parse(localStorage.getItem("user_data") || "{}");
+        if (!userData?.id) {
+            alert("Usuário não identificado. Faça login novamente.");
+            return;
+        }
+
         setIsSubmitting(true);
 
         const formData = new FormData();
@@ -66,20 +70,15 @@ export default function AddFeedback() {
         formData.append("descricao", descricao);
         formData.append("categoria", categoria.toUpperCase());
         formData.append("prioridade", prioridade.toUpperCase());
-        formData.append("usuarioId", "1");
+        formData.append("usuarioId", String(userData.id));
         if (imagem) {
             formData.append("imagem", imagem);
         }
 
         try {
             await api.post("/feedbacks", formData, {
-                headers: {
-                    // Força o Axios a remover o Content-Type padrão (application/json)
-                    // deixando o browser setar multipart/form-data; boundary=... automaticamente
-                    "Content-Type": undefined,
-                },
+                headers: { "Content-Type": undefined },
             });
-
             alert("Feedback cadastrado com sucesso!");
             setTitulo("");
             setDescricao("");
@@ -108,7 +107,6 @@ export default function AddFeedback() {
 
             <CardContent className="space-y-6">
 
-                {/* Categoria e Prioridade */}
                 <section className="flex flex-row w-full gap-4">
                     <div className="flex-1 space-y-2">
                         <Label htmlFor="categoria">Categoria</Label>
@@ -122,19 +120,9 @@ export default function AddFeedback() {
                                         <Lightbulb className="w-4 h-4" /><span>Sugestão</span>
                                     </div>
                                 </SelectItem>
-                                <SelectItem value="bug">
+                                <SelectItem value="correcao">
                                     <div className="flex items-center gap-2">
-                                        <Bug className="w-4 h-4" /><span>Erro / Bug</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="melhoria">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4" /><span>Melhoria</span>
-                                    </div>
-                                </SelectItem>
-                                <SelectItem value="outro">
-                                    <div className="flex items-center gap-2">
-                                        <MoreHorizontal className="w-4 h-4" /><span>Outro</span>
+                                        <Bug className="w-4 h-4" /><span>Correção / Bug</span>
                                     </div>
                                 </SelectItem>
                             </SelectContent>
@@ -151,13 +139,12 @@ export default function AddFeedback() {
                                 <SelectItem value="baixa">Baixa</SelectItem>
                                 <SelectItem value="media">Média</SelectItem>
                                 <SelectItem value="alta">Alta</SelectItem>
-                                <SelectItem value="urgente">Urgente</SelectItem>
+                                <SelectItem value="critica">Critica</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </section>
 
-                {/* Título */}
                 <section className="space-y-2">
                     <Label htmlFor="titulo">Título*</Label>
                     <Input
@@ -173,7 +160,6 @@ export default function AddFeedback() {
                     </p>
                 </section>
 
-                {/* Descrição */}
                 <section className="space-y-2">
                     <Label htmlFor="descricao">Descrição*</Label>
                     <Textarea
@@ -189,11 +175,9 @@ export default function AddFeedback() {
                     </p>
                 </section>
 
-                {/* ─── NOVO: Upload de Imagem ─── */}
                 <section className="space-y-2">
                     <Label>Captura de tela / Imagem (opcional)</Label>
 
-                    {/* Área de drop/clique — só aparece se não tem preview */}
                     {!previewUrl && (
                         <label
                             htmlFor="imagem-upload"
@@ -216,7 +200,6 @@ export default function AddFeedback() {
                         </label>
                     )}
 
-                    {/* Preview da imagem selecionada */}
                     {previewUrl && (
                         <div className="relative w-full rounded-lg overflow-hidden border border-muted">
                             <img

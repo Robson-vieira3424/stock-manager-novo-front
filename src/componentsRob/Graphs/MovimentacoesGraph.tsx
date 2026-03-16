@@ -1,4 +1,4 @@
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import {
     Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
 } from "@/components/ui/card"
@@ -23,23 +23,31 @@ const chartConfig = {
 
 export function MovimentacoeGraph({ data }: Props) {
     return (
-        <Card className="w-full">
-            <CardHeader>
+        <Card className="w-full overflow-hidden">
+            <CardHeader className="pb-2">
                 <CardTitle>Movimentações por Mês</CardTitle>
-                <CardDescription>Últimos 6 meses</CardDescription>
+                <CardDescription>Entradas e saídas de estoque nos últimos 6 meses</CardDescription>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <LineChart data={data} margin={{ left: 12, right: 12 }}>
+            <CardContent className="pb-0">
+                <ChartContainer config={chartConfig} className="h-[240px] w-full">
+                    <LineChart data={data} margin={{ left: 0, right: 12, top: 8, bottom: 0 }}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                             dataKey="mes"
                             tickLine={false}
-                            axisLine={false}
+                            axisLine={{ stroke: "#d1d5db", strokeWidth: 2 }}
                             tickMargin={8}
                             tickFormatter={(value) => value.slice(0, 3)}
                         />
+                        <YAxis
+                            tickLine={false}
+                            axisLine={{ stroke: "#d1d5db", strokeWidth: 2 }}
+                            tickMargin={8}
+                            width={30}
+                            tickFormatter={(value) => String(value)}
+                        />
                         <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                    
                         <Line
                             dataKey="entradas"
                             type="monotone"
@@ -67,9 +75,6 @@ export function MovimentacoeGraph({ data }: Props) {
                     </LineChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="text-sm text-muted-foreground">
-                Entradas e saídas de estoque nos últimos 6 meses
-            </CardFooter>
         </Card>
     )
 }

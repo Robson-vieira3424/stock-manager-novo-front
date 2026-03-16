@@ -4,6 +4,8 @@ import { LayoutDashboard } from "lucide-react"
 import { MovimentacoeGraph } from "@/componentsRob/Graphs/MovimentacoesGraph"
 import { SecretariasGraph } from "@/componentsRob/Graphs/SecretatiasGraph"
 import api from "@/services/api"
+import EstoqueGraphsBar from "@/componentsRob/Graphs/EstoqueGraphsBar"
+import UltimasManutencoes from "@/componentsRob/Graphs/CardUltimasMovimentacoes"
 
 type MesData = {
     mes: string
@@ -41,10 +43,11 @@ export default function DashboardPage() {
                 icon={LayoutDashboard}
             />
             <div className="grid grid-cols-2 gap-4 py-4">
-                <MovimentacoeGraph data={movimentacoes} key={movimentacoes.length} />
-                <SecretariasGraph data={secretariasSaidas} key={secretariasSaidas.length} />
-                {/* <OutroGrafico /> */}
-                {/* <OutroGrafico /> */}
+                <MovimentacoeGraph data={movimentacoes} key={`mov-${movimentacoes.length}`} />
+                <SecretariasGraph data={secretariasSaidas} key={`sec-${secretariasSaidas.length}`} />
+                <UltimasManutencoes/>
+                <EstoqueGraphsBar />
+              
             </div>
         </>
     )

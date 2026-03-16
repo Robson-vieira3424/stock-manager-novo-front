@@ -19,11 +19,7 @@ export default function ComputadoresPage() {
   const fetchValuesCards = async () => {
     try {
       const response = await api.get("/computador/infos");
-
-     
-
       const data =  response.data ;
-
       setValuesCards({
         totalComputadores: data.totalComputadores,
         totalAtivos: data.totalAtivos,
@@ -34,9 +30,6 @@ export default function ComputadoresPage() {
       console.error("Erro ao carregar dados do painel:", error);
     }
   };
-
-
-  
   
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
