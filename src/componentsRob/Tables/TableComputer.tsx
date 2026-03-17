@@ -229,10 +229,10 @@ export default function TableComputador() {
                   <TableCell className="p-4 align-middle border-b border-black/5">
                     <div className="flex flex-col gap-[2px] items-center text-center">
                       <div className="font-semibold text-gray-800 text-[14px]">
-                        {estacao.secretariaName || "-"}
+                        {estacao.secretaria || "-"}
                       </div>
                       <div className="font-medium text-gray-500 text-[13px]">
-                        {estacao.departamentoName || "-"}
+                        {estacao.setor || "-"}
                       </div>
                     </div>
                   </TableCell>
