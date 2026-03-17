@@ -114,7 +114,7 @@ export default function MapeamentoPage() {
             {IsformOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
-                        <FormSecretaria onClose={() => setIsFormOpen(false)} />
+                        <FormSecretaria onClose={() => setIsFormOpen(false) }   onSuccess={getSecretarias}/>
                     </div>
                 </div>
             )}

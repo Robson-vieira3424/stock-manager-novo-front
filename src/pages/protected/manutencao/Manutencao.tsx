@@ -105,11 +105,12 @@ export default function ManutencaoPage() {
             <PainelManutencao data={infoCards}
             />
            
-            {taxaRecuperacao && <Progresso data={taxaRecuperacao} />}
+           <Progresso data={taxaRecuperacao ?? { taxa: 0, recuperados: 0, baixas: 0 }} />
 
             <FormManutencao
                 open={modalAberto}
                 onOpenChange={setModalAberto}
+                onSuccess={getManutencoes}
             />
             <FormAtualizarManutencao
                 open={modalAtualizarAberto}

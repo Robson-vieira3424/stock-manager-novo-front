@@ -12,9 +12,10 @@ import api from "@/services/api";
 
 interface FormSecretariaProps {
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-export default function FormSecretaria({ onClose }: FormSecretariaProps) {
+export default function FormSecretaria({ onClose , onSuccess}: FormSecretariaProps) {
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -63,6 +64,7 @@ export default function FormSecretaria({ onClose }: FormSecretariaProps) {
             alert("Secretaria cadastrada com sucesso!"); 
             
             onClose();
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Erro na requisição:", error);
             alert("Não foi possível salvar a secretaria.");

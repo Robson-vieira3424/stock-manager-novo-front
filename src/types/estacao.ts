@@ -5,4 +5,5 @@ export interface Estacao {
     processador: string;    
     patrimonio?: string;    
     status?: string;
+    dataUltimaManutencao?: string;
 }

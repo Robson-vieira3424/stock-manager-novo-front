@@ -36,14 +36,7 @@ const router = createBrowserRouter([
         path: "/dashboard",
         element: <DashboardPage />,
       },
-      {
-        path: "/mapeamento",
-        element: <MapeamentoPage />,
-      },
-      {
-        path: "/mapeamento/:id",
-        element: <DetalhesSecretaria />,
-      },
+      
       {
         path: "/feedbacks",
         element: <FeedbackPage />,
@@ -94,8 +87,22 @@ const router = createBrowserRouter([
           </RotaProtegida>
         ),
       },
-
-      // ── Sem acesso ───────────────────────────────────
+      {
+        path: "/mapeamento",
+        element: (
+          <RotaProtegida permissoesPermitidas={SO_ADMIN}>
+            <MapeamentoPage />
+          </RotaProtegida>
+        ),
+      },
+      {
+        path: "/mapeamento/:id",
+        element: (
+          <RotaProtegida permissoesPermitidas={SO_ADMIN}>
+            <DetalhesSecretaria />
+          </RotaProtegida>
+        ),
+      },
       {
         path: "/sem-acesso",
         element: (

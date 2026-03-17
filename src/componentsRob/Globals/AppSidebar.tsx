@@ -33,7 +33,7 @@ export default function AppSidebar() {
 
   const menuItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, visivel: true },
-    { title: "Mapeamento", url: "/mapeamento", icon: MapPinned, visivel: true },
+    { title: "Mapeamento", url: "/mapeamento", icon: MapPinned, visivel: isAdmin },
     { title: "Feedback", url: "/feedbacks", icon: MessageSquarePlus, visivel: true },
     { title: "Estoque", url: "/produtos", icon: Package, visivel: isAdmin || isEstoquista },
     { title: "Movimentações", url: "/movimentacoes", icon: ArrowLeftRight, visivel: isAdmin || isEstoquista },
@@ -44,7 +44,7 @@ export default function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarContent className="flex flex-col h-full">
+  <SidebarContent className="flex flex-col h-full">
 
         {/* HEADER */}
         <div className="p-4 border-b">

@@ -34,10 +34,14 @@ import { useEffect, useState } from "react";
 interface FormManutencaoProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onSuccess?: () => void;
 }
-interface TecnicoDTO {
+
+interface UsuarioLogado {
     id: number;
     nome: string;
+    email: string;
+    permissao: string;
 }
 
 const prioridades = ["BAIXA", "MEDIA", "ALTA", "CRITICA"];
@@ -58,11 +62,16 @@ const getStatusBadge = (status: string) => {
     return "bg-gray-100 text-gray-700 border-gray-200";
 };
 
-export default function FormManutencao({ open, onOpenChange }: FormManutencaoProps) {
-    const [tecnicos, setTecnicos] = useState<TecnicoDTO[]>([]);
+function getUsuarioLogado(): UsuarioLogado | null {
+    const raw = localStorage.getItem("user_data");
+    if (!raw) return null;
+    return JSON.parse(raw) as UsuarioLogado;
+}
+
+export default function FormManutencao({ open, onOpenChange, onSuccess }: FormManutencaoProps) {
+    const usuarioLogado = getUsuarioLogado();
 
     const [selectedComputer, setSelectedComputer] = useState<ComputadorBuscaDTO | null>(null);
-
     const [sugestoesComputadores, setSugestoesComputadores] = useState<ComputadorBuscaDTO[]>([]);
     const [buscandoPC, setBuscandoPC] = useState(false);
     const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
@@ -71,28 +80,15 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
         defaultValues: {
             patrimonio: "",
             descricao: "",
-            tecnico: "",
             tipoManutencao: "",
-            observacoes:"", 
+            observacoes: "",
             prioridade: "",
             dataPrevisao: undefined as Date | undefined,
         }
     });
 
-    async function getTecnicos() {
-        try {
-            const resposta = await api.get("/users/permission/ROLE_TECNICO");
-            // Proteção extra caso a API retorne algo que não seja array
-            if (Array.isArray(resposta.data)) {
-                setTecnicos(resposta.data);
-            }
-        } catch (erro) {
-            console.log("Erro ao buscar os tecnicos", erro);
-        }
-    }
-
     async function buscarComputadores(termo: string) {
-        if (!termo || termo.length < 2) { // Só busca se tiver 2+ letras
+        if (!termo || termo.length < 2) {
             setSugestoesComputadores([]);
             setMostrarSugestoes(false);
             return;
@@ -100,7 +96,6 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
 
         setBuscandoPC(true);
         try {
-            // Envia o termo como query param: /computador/buscar?termo=valor
             const { data } = await api.get(`/computador/buscar`, {
                 params: { termo }
             });
@@ -112,12 +107,12 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
             setBuscandoPC(false);
         }
     }
+
     useEffect(() => {
         if (!open) {
             setSelectedComputer(null);
             setSugestoesComputadores([]);
-        } else {
-            getTecnicos();
+            form.reset();
         }
     }, [open]);
 
@@ -127,25 +122,29 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
             return;
         }
 
+        if (!usuarioLogado?.id) {
+            alert("Usuário não identificado. Faça login novamente.");
+            return;
+        }
+
         try {
             const payload = {
-                pc: {
-                    id: selectedComputer.id 
-                },
+                pc: { id: selectedComputer.id },
                 descricaoProblema: data.descricao,
                 tipo: data.tipoManutencao,
-                prioridade: data.prioridade.toUpperCase(), 
-                observacoes: data.observações,
-                dataPrevisao: data.dataPrevisao ? data.dataPrevisao.toISOString().split('T')[0] : null, 
-                tecnicoId: Number(data.tecnico)                
+                prioridade: data.prioridade.toUpperCase(),
+                observacoes: data.observacoes,
+                dataPrevisao: data.dataPrevisao ? data.dataPrevisao.toISOString().split('T')[0] : null,
+                tecnicoId: usuarioLogado.id
             };
 
             await api.post("/manutencao", payload);
 
             alert("Manutenção registrada com sucesso!");
-            onOpenChange(false); // Fecha o modal
-            form.reset(); // Limpa o form
+            onOpenChange(false);
+            form.reset();
             setSelectedComputer(null);
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Erro ao salvar", error);
             alert("Erro ao registrar manutenção.");
@@ -154,20 +153,20 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-
             <DialogContent
                 className="sm:max-w-[650px] max-h-[85vh] flex flex-col"
                 aria-describedby="dialog-description-text"
             >
                 <DialogHeader>
                     <DialogTitle>Registrar Nova Manutenção</DialogTitle>
-                    {/* CORREÇÃO 1: Adicionei o ID correspondente aqui */}
                     <DialogDescription id="dialog-description-text">
                         Preencha os campos abaixo para abrir um chamado técnico.
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4 overflow-y-auto px-4 ">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4 overflow-y-auto px-4">
+
+                    {/* Seleção de Computador */}
                     <Controller
                         name="patrimonio"
                         control={form.control}
@@ -178,15 +177,12 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                     <Label htmlFor="patrimonio">Selecionar Computador</Label>
                                 </div>
 
-
                                 {selectedComputer ? (
-
                                     <div className="flex items-center justify-between p-4 border rounded-lg shadow-sm hover:shadow-md transition-all bg-white group">
                                         <div className="flex items-center gap-4">
                                             <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
                                                 <Monitor className="h-6 w-6" />
                                             </div>
-
                                             <div className="flex flex-col">
                                                 <span className="font-semibold text-lg text-gray-900 leading-none mb-1">
                                                     {selectedComputer.nome}
@@ -199,29 +195,26 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                                 </span>
                                             </div>
                                         </div>
-
                                         <Button
                                             type="button"
                                             variant="ghost"
                                             size="icon"
                                             className="text-gray-400 hover:text-red-500 hover:bg-red-50"
                                             onClick={() => {
-                                                setSelectedComputer(null); // Limpa o card visual
-                                                field.onChange(""); // Limpa o valor no formulário
+                                                setSelectedComputer(null);
+                                                field.onChange("");
                                             }}
                                         >
                                             <X className="h-5 w-5" />
                                         </Button>
                                     </div>
                                 ) : (
-                                    // --- INPUT DE BUSCA ---
                                     <div className="relative">
                                         {buscandoPC ? (
                                             <Loader2 className="absolute left-2.5 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
                                         ) : (
                                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                         )}
-
                                         <Input
                                             {...field}
                                             id="patrimonio"
@@ -238,18 +231,16 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                             onBlur={() => setTimeout(() => setMostrarSugestoes(false), 200)}
                                         />
 
-                                        {/* --- LISTA DE SUGESTÕES (DROPDOWN) --- */}
                                         {mostrarSugestoes && sugestoesComputadores.length > 0 && (
-                                            <div className="absolute w-full bg-white border rounded-md shadow-xl mt-1 max-h-60 overflow-y-auto z-50 top-full overflow-hidden">
+                                            <div className="absolute w-full bg-white border rounded-md shadow-xl mt-1 max-h-60 overflow-y-auto z-50 top-full">
                                                 {sugestoesComputadores.map((pc) => (
                                                     <div
                                                         key={pc.patrimonio}
-                                                        // "w-full" e "cursor-pointer" na div pai garantem o clique em toda a área
                                                         className="w-full px-4 py-3 hover:bg-slate-50 cursor-pointer border-b last:border-0 transition-colors flex items-center justify-between group"
                                                         onClick={() => {
-                                                            field.onChange(pc.patrimonio); // Salva no form
-                                                            setSelectedComputer(pc);       // Salva objeto para mostrar o Card
-                                                            setMostrarSugestoes(false);    // Fecha lista
+                                                            field.onChange(pc.patrimonio);
+                                                            setSelectedComputer(pc);
+                                                            setMostrarSugestoes(false);
                                                         }}
                                                     >
                                                         <div className="flex flex-col gap-1">
@@ -257,15 +248,11 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                                                 {pc.nome}
                                                             </span>
                                                             <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                                <span className=" px-1.5 py-0.5  text-gray-600 font-normal text-[14px]">
-                                                                    {pc.patrimonio}
-                                                                </span>
+                                                                <span className="text-gray-600 font-normal text-[14px]">{pc.patrimonio}</span>
                                                                 <span>•</span>
                                                                 <span className="text-[14px]">{pc.localizacao}</span>
                                                             </div>
                                                         </div>
-
-                                                        {/* Badge de Status Estilizado */}
                                                         <span className={`text-[10px] px-2 py-1 rounded-full border font-semibold ${getStatusBadge(pc.statusEquipamento)}`}>
                                                             {pc.statusEquipamento}
                                                         </span>
@@ -283,14 +270,13 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                 )}
 
                                 {fieldState.error && (
-                                    <span className="text-red-500 text-sm">
-                                        {fieldState.error.message}
-                                    </span>
+                                    <span className="text-red-500 text-sm">{fieldState.error.message}</span>
                                 )}
                             </div>
                         )}
                     />
 
+                    {/* Descrição */}
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="descricao">Descrição do Problema *</Label>
                         <Controller
@@ -300,35 +286,22 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                 <Textarea
                                     {...field}
                                     id="descricao"
-                                    className="min-h-[100px] w-full resize-none break-all whitespace-pre-wrap focus-visible:ring-blue-600 focus-visible:border-none"
+                                    className="min-h-[100px] w-full resize-none break-all whitespace-pre-wrap focus-visible:ring-blue-600"
                                     placeholder="Descreva o problema..."
                                 />
                             )}
                         />
                     </div>
 
-
+                    {/* Técnico (somente leitura) + Tipo de Manutenção */}
                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2 w-full">
                             <Label>Técnico Responsável</Label>
-                            <Controller
-                                name="tecnico"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Selecione o técnico" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {tecnicos?.map((tec) => (
-                                                <SelectItem key={tec.id} value={String(tec.id)}>
-                                                    {tec.nome}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                )}
-                            />
+                            <div className="flex items-center p-3 border rounded-md bg-slate-50 h-10">
+                                <span className="text-sm font-medium text-gray-800">
+                                    {usuarioLogado?.nome ?? "Usuário não identificado"}
+                                </span>
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-2 w-full">
@@ -351,6 +324,7 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                         </div>
                     </div>
 
+                    {/* Prioridade + Data de Previsão */}
                     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-2">
                             <Label>Prioridade</Label>
@@ -384,17 +358,10 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                         <PopoverTrigger asChild>
                                             <Button
                                                 variant={"outline"}
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !field.value && "text-muted-foreground"
-                                                )}
+                                                className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
                                             >
                                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {field.value ? (
-                                                    format(field.value, "PPP", { locale: ptBR })
-                                                ) : (
-                                                    <span>Selecione a data</span>
-                                                )}
+                                                {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione a data</span>}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0">
@@ -412,6 +379,7 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                         </div>
                     </div>
 
+                    {/* Observações */}
                     <div className="flex flex-col gap-2">
                         <Label htmlFor="obs">Observações</Label>
                         <Controller
@@ -421,7 +389,7 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                                 <Textarea
                                     {...field}
                                     id="obs"
-                                    className="min-h-[100px] w-full resize-none break-all whitespace-pre-wrap focus-visible:ring-blue-600 focus-visible:border-none"
+                                    className="min-h-[100px] w-full resize-none break-all whitespace-pre-wrap focus-visible:ring-blue-600"
                                     placeholder="Observações adicionais..."
                                 />
                             )}
@@ -429,7 +397,9 @@ export default function FormManutencao({ open, onOpenChange }: FormManutencaoPro
                     </div>
 
                     <div className="flex justify-end pt-4">
-                        <Button type="submit" variant="blue">Salvar Manutenção</Button>
+                        <Button type="submit" variant="blue" className="hover:cursor-pointer">
+                            Salvar Manutenção
+                        </Button>
                     </div>
                 </form>
             </DialogContent>
