@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import api from "@/services/api"
 import { SecretariaHierarquia } from "@/types/secretariaHierarquia";
 import FormDepartamento from "@/componentsRob/Forms/FormDepartamento";
+
 export default function DetalhesSecretaria() {
     const { id } = useParams();
     const [secretaria, setSecretaria] = useState<SecretariaHierarquia | null>(null);

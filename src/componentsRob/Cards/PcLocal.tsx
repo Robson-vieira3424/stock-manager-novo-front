@@ -33,7 +33,7 @@ export default function PcLocal({ departamento }: PcLocalProps) {
                 ) : (
                     departamento.estacoes.map((estacao) => (
                         <div
-                            key={estacao.id}
+                            key={estacao.idEstacao}
                             className="border border-zinc-200 rounded-md overflow-hidden bg-white cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.02] hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/20"
                         >
 
@@ -93,7 +93,7 @@ export default function PcLocal({ departamento }: PcLocalProps) {
 
                             {/* Footer: ID e Data (Extremidades) */}
                             <div className="flex justify-between items-center bg-zinc-50/50 p-2 px-3 text-xs text-zinc-500">
-                                <span className="font-medium">ID: <span className="text-zinc-700">{estacao.id}</span></span>
+                                <span className="font-medium">ID: <span className="text-zinc-700">{estacao.idEstacao}</span></span>
                                 {/* Data fake ou remover se não tiver no DTO */}
                                 <span>Manut: <span className="text-zinc-700">--/--/--</span></span>
                             </div>

@@ -1,5 +1,5 @@
 export interface Estacao {
-    id: number;
+    idEstacao: number;
     localizacao: string;
     nomeComputador: string; 
     processador: string;    
