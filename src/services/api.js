@@ -1,14 +1,14 @@
 import axios from "axios";
 import Cookies from "js-cookie"; // Importe o js-cookie para manter compatibilidade com seu AuthContext
-
+/*
 const api = axios.create({
   baseURL: "http://localhost:8080", 
   headers: {
     "Content-Type": "application/json",
   },
 });
+*/
 
-/*
 const api = axios.create({
   baseURL: "https://stock-manager-19c3.onrender.com",
   headers: {
@@ -16,7 +16,7 @@ const api = axios.create({
   },
 });
 
-*/
+
 
 api.interceptors.response.use(
   (response) => response,
