@@ -39,7 +39,7 @@ export default function DetalhesSecretaria() {
     }
 
     const departamentosComComputadores = secretaria.departamentos.filter(
-        (dept) => dept.computadores && dept.computadores.length > 0
+        (dept) => dept.estacoes && dept.estacoes.length > 0
     );
 
     return (<>
