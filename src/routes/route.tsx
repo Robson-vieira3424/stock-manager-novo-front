@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
-import Login from "@/pages/login/Login"
+import Login from "@/pages/public/Login"
 import PrivateRoutes from "./private"
 import DefaultLayout from "../layouts/defaultLayout"
 import RotaProtegida from "../componentsRob/RotaProtegida/RotaProtegida"
@@ -13,6 +13,8 @@ import EstoquePage from "@/pages/protected/estoque/Estoque"
 import DetalhesSecretaria from "@/pages/protected/detalheSec/DetalhesSec"
 import FeedbackPage from "@/pages/protected/feedback/Feedback"
 import ConfiguracoesPage from "@/pages/protected/configuracoes/ConfiguracoesPage"
+import ResetPassword from "@/pages/public/ResetPassword"
+import RecuperarSenha from "@/pages/public/ResetPassword"
 
 const TODOS = ["ROLE_ADMIN", "ROLE_ESTOQUISTA", "ROLE_TECNICO", "ROLE_SUPERVISOR"];
 const SO_ADMIN = ["ROLE_ADMIN"];
@@ -23,6 +25,11 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Login />,
+  },
+  
+  {
+    path: "/resetpassword",
+    element: <RecuperarSenha />,
   },
   {
     element: (
