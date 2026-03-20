@@ -193,7 +193,11 @@ export default function Login() {
                 <label className="block text-sm font-medium text-gray-700">
                   Senha
                 </label>
-                <button className="hover:cursor-pointer " type="button" onClick={() => navigate("/resetpassword")}>
+                <button
+                  type="button"
+                  onClick={() => navigate("/resetpassword")}
+                  className="text-xs text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors cursor-pointer"
+                >
                   Esqueci minha senha
                 </button>
               </div>
@@ -218,20 +222,6 @@ export default function Login() {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="lembrar"
-                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600"
-              />
-              <label
-                htmlFor="lembrar"
-                className="text-sm text-gray-600 cursor-pointer select-none font-medium"
-              >
-                Manter conectado
-              </label>
             </div>
 
             <button
