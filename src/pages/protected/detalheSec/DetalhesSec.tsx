@@ -37,17 +37,22 @@ export default function DetalhesSecretaria() {
     if (!secretaria) {
         return <div className="p-10 text-center">Secretaria não encontrada.</div>;
     }
+
+    const departamentosComComputadores = secretaria.departamentos.filter(
+        (dept) => dept.computadores && dept.computadores.length > 0
+    );
+
     return (<>
         <HeaderSecId nome={secretaria.nomeSecretaria}
             onAddClick={() => setIsModalOpen(true)}
          />
         <section className="w-full flex flex-wrap gap-6 items-start">
-            {secretaria.departamentos.map((dept, index) => (
+            {departamentosComComputadores.map((dept, index) => (
                 <PcLocal key={index} departamento={dept} />
             ))}
 
-            {secretaria.departamentos.length === 0 && (
-                <p className="text-muted-foreground italic">Nenhum departamento cadastrado.</p>
+            {departamentosComComputadores.length === 0 && (
+                <p className="text-muted-foreground italic">Nenhum departamento com computadores cadastrado.</p>
             )}
         </section>
 
@@ -56,11 +61,11 @@ export default function DetalhesSecretaria() {
         {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                 <FormDepartamento
-                    secretariaId={id as string} // Passa o ID da URL pro form
+                    secretariaId={id as string}
                     onClose={() => setIsModalOpen(false)}
                     onSuccess={() => {
-                        setIsModalOpen(false); // Fecha o modal
-                        fetchDados(); // Atualiza a tela com o novo departamento
+                        setIsModalOpen(false);
+                        fetchDados();
                     }}
                 />
             </div>
