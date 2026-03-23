@@ -8,15 +8,20 @@ const api = axios.create({
   },
 });
 */
-
+/*
 const api = axios.create({
   baseURL: "https://stock-manager-19c3.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-
+*/
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 api.interceptors.response.use(
   (response) => response,
