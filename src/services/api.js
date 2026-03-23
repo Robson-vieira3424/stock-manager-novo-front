@@ -17,7 +17,7 @@ const api = axios.create({
 });
 */
 const api = axios.create({
-  baseURL: back_api_url,
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
