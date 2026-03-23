@@ -38,9 +38,9 @@ const PRESETS = {
     Marca: "Dell",
     Modelo: "All-in-One",
     MarcaMonitor: "Dell",
-    Processador: "Intel Core I5-10400",
+    Processador: "Intel Core I5-1335u",
     Tamanho: "Integrado",
-    Memoria: "Memoria Ram - 8 Gb",
+
     ModeloMonitor: "Integrado",
   },
   lenovo: {
@@ -49,15 +49,16 @@ const PRESETS = {
     MarcaMonitor: "Lenovo",
     ModeloMonitor: "ThinkVision",
     Tamanho: "24'",
-    Processador: "Ryzen 5 5650G",
+    Processador: "Ryzen 5 5650g",
+   
   },
   dell: {
     Marca: "Dell",
     Modelo: "XPS",
     MarcaMonitor: "Dell",
     ModeloMonitor: "XPS",
-    Processador: "NÃO SEI",
     Tamanho: "24'",
+    Processador: "",
   },
   generico: {
     Marca: "",
@@ -78,7 +79,6 @@ const formSchema = z.object({
   Processador: z.string().min(4, "Mínimo 4 caracteres"),
   Memoria: z.string().min(3, "Selecione a memória"),
   Armazenamento: z.string().min(2, "Obrigatório"),
-  tipoArmazenamento: z.enum(["HD", "SSD", "Nvme"], { error: "Selecione uma opção válida" }),
   sistemaOperacional: z.string().optional(),
 
   PatrimonioMonitor: z.string().optional(),
@@ -111,8 +111,17 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
   const [memoriasGenericas, setMemoriasGenericas] = useState<Produto[]>([]);
   const [processadoresGenericos, setProcessadoresGenericos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(false);
-  const mostrarPerifericos =
-    cardSelecionado !== null && cardSelecionado !== "allinone";
+  const [armazensGenericos, setArmazensGenericos] = useState<Produto[]>([]);
+
+  const mostrarPerifericos = cardSelecionado !== null && cardSelecionado !== "allinone";
+
+  // ✅ processadorTravado corrigido — Dell e generico ficam livres
+  const processadorTravado =
+    cardSelecionado !== null &&
+    cardSelecionado !== "generico" &&
+    cardSelecionado !== "dell";
+
+  const marcaTravada = cardSelecionado !== null && cardSelecionado !== "generico";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -124,11 +133,9 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       Processador: "",
       Memoria: "",
       Armazenamento: "",
-      tipoArmazenamento: undefined,
       sistemaOperacional: undefined,
       secretariaId: undefined,
       setorId: undefined,
-
       PatrimonioMonitor: "",
       MarcaMonitor: "",
       ModeloMonitor: "",
@@ -140,14 +147,11 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     },
   });
 
-
   useEffect(() => {
     async function carregarSecretarias() {
       try {
-        // Axios já retorna o JSON em .data e lança erro se falhar
         const response = await api.get("/secretaria");
         setSecretarias(response.data);
-
         console.log("Secretarias vindo para o formulario", response.data);
       } catch (error) {
         console.error("Erro ao carregar secretarias", error);
@@ -157,24 +161,21 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     carregarSecretarias();
     getProcessadoresGenericos();
     getMemoriasGenericas();
+    getArmazensGenericos();
   }, []);
-  // --- Lógica de Presets ---
-  useEffect(() => {
-    if (cardSelecionado && PRESETS[cardSelecionado as keyof typeof PRESETS]) {
-      const preset = PRESETS[cardSelecionado as keyof typeof PRESETS];
 
-      form.setValue("Marca", preset.Marca);
-      form.setValue("Modelo", preset.Modelo);
-      form.setValue("Processador", preset.Processador);
-
-      if (cardSelecionado !== "allinone") {
-        form.setValue("MarcaMonitor", preset.MarcaMonitor);
-        form.setValue("TamanhoMonitor", preset.Tamanho);
-        form.setValue("ModeloMonitor", preset.ModeloMonitor);
-      }
-      form.setValue("tipo", cardSelecionado);
+  async function getArmazensGenericos() {
+    try {
+      const [resSSD, resHD] = await Promise.all([
+        api.get("/product/tipoProduto/SSD"),
+        api.get("/product/tipoProduto/HD"),
+      ]);
+      setArmazensGenericos([...resSSD.data, ...resHD.data]);
+    } catch (erro) {
+      toast.error("Erro ao buscar armazenamentos.");
+      console.log("Erro ao buscar armazenamentos:", erro);
     }
-  }, [cardSelecionado, form]);
+  }
 
   async function getMemoriasGenericas() {
     try {
@@ -185,19 +186,20 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       console.log("Erro ao buscar memorias:", erro);
     }
   }
+
   async function getProcessadoresGenericos() {
     try {
       const response = await api.get("/product/tipoProduto/PROCESSADOR");
       setProcessadoresGenericos(response.data);
-      console.log("Processadores chegando: ", response.data)
+      console.log("Processadores chegando: ", response.data);
     } catch (erro) {
       toast.error("Erro ao buscar processadores.");
       console.log("Erro ao buscar processadores:", erro);
     }
   }
- 
+
   async function onSubmit(values: FormValues) {
-    setLoading(true)
+    setLoading(true);
     if (!cardSelecionado) {
       alert("Por favor, selecione o tipo de equipamento (Card) no topo.");
       return;
@@ -205,25 +207,24 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
 
     const usarEstabilizador = cardSelecionado !== "allinone";
 
-    // ... (Lógica de montagem dos payloads auxiliar permanece igual) ...
     const estabilizadorPayload = usarEstabilizador
       ? {
-        patrimonio: values.PatrimonioEstabilizador || "",
-        marca: values.MarcaEsatbilizador || "",
-        modelo: values.ModeloEstabilizador || "",
-        potencia: values.Potencia || "",
-      }
+          patrimonio: values.PatrimonioEstabilizador || "",
+          marca: values.MarcaEsatbilizador || "",
+          modelo: values.ModeloEstabilizador || "",
+          potencia: values.Potencia || "",
+        }
       : { patrimonio: "N/A", marca: "N/A", modelo: "N/A", potencia: "" };
 
     const monitorPayload =
       cardSelecionado === "allinone"
         ? { patrimonio: "Integrado", marca: "Dell", modelo: "Monitor Integrado", tamanho: "24'" }
         : {
-          patrimonio: values.PatrimonioMonitor || "",
-          marca: values.MarcaMonitor || "",
-          modelo: values.ModeloMonitor || "",
-          tamanho: values.TamanhoMonitor || "",
-        };
+            patrimonio: values.PatrimonioMonitor || "",
+            marca: values.MarcaMonitor || "",
+            modelo: values.ModeloMonitor || "",
+            tamanho: values.TamanhoMonitor || "",
+          };
 
     const payload = {
       computador: {
@@ -235,7 +236,6 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
         processador: values.Processador,
         memoria: values.Memoria,
         armazenamento: values.Armazenamento,
-        tipoArmazenamento: values.tipoArmazenamento,
         sistemaOperacional: values.sistemaOperacional,
       },
       secretariaId: values.secretariaId,
@@ -248,19 +248,17 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       await api.post("/estacao", payload);
       console.log("Estação enviada", payload);
       toast.success("Equipamento cadastrado com sucesso!");
-      
       form.reset();
       onClose();
-      
     } catch (error) {
       console.error("Erro ao cadastrar", error);
-
       const msgErro = error.response?.data?.message || "Erro ao salvar no servidor.";
       toast.error(msgErro);
-    }finally{
+    } finally {
       setLoading(false);
     }
   }
+
   useEffect(() => {
     if (cardSelecionado && PRESETS[cardSelecionado as keyof typeof PRESETS]) {
       const preset = PRESETS[cardSelecionado as keyof typeof PRESETS];
@@ -269,11 +267,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
       form.setValue("Modelo", preset.Modelo);
       form.setValue("Processador", preset.Processador);
 
-      // ADICIONE ESSA LINHA ABAIXO:
-      // Se o preset tiver memória definida, preenche o campo
-      if ("Memoria" in preset && preset.Memoria) {
-        form.setValue("Memoria", preset.Memoria);
-      }
+     
       if (cardSelecionado !== "allinone") {
         form.setValue("MarcaMonitor", preset.MarcaMonitor);
         form.setValue("TamanhoMonitor", preset.Tamanho);
@@ -283,10 +277,11 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
     }
   }, [cardSelecionado, form]);
 
-  const inputStyle = "pl-2.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:border-transparent focus-visible:shadow-lg transition-all duration-200";
-  const selectTriggerStyle = "w-full focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:shadow-lg transition-all duration-200";
-  const marcaTravada = cardSelecionado !== null && cardSelecionado !== "generico";
-  const processadorTravado = cardSelecionado !== null && cardSelecionado !== "generico";
+  const inputStyle =
+    "pl-2.5 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:border-transparent focus-visible:shadow-lg transition-all duration-200";
+  const selectTriggerStyle =
+    "w-full focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:shadow-lg transition-all duration-200";
+
   return (
     <Form {...form}>
       <form
@@ -294,9 +289,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
         className="w-full max-w-[750px] mx-auto bg-white p-8 rounded-xl overflow-y-auto max-h-[85vh] shadow-sm"
       >
         <header className="mb-4">
-          <h2 className="font-bold text-xl text-gray-900 m-0">
-            Cadastrar Novo Computador
-          </h2>
+          <h2 className="font-bold text-xl text-gray-900 m-0">Cadastrar Novo Computador</h2>
         </header>
 
         {/* --- SEÇÃO DOS CARDS --- */}
@@ -343,8 +336,8 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                 </h2>
               </div>
 
-              {/* Linha 1 */}
               <div className="flex flex-row flex-wrap gap-5 border-b border-black/10 pb-4 mb-4">
+                {/* Patrimônio */}
                 <FormField control={form.control} name="Patrimonio" render={({ field }) => (
                   <FormItem className="min-w-[48%] flex-1">
                     <FormLabel>Patrimônio *</FormLabel>
@@ -353,6 +346,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                   </FormItem>
                 )} />
 
+                {/* Nome */}
                 <FormField control={form.control} name="Nome" render={({ field }) => (
                   <FormItem className="min-w-[48%] flex-1">
                     <FormLabel>Nome/Identificação *</FormLabel>
@@ -361,151 +355,133 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
                   </FormItem>
                 )} />
 
+                {/* Marca */}
                 <FormField control={form.control} name="Marca" render={({ field }) => (
                   <FormItem className="min-w-[48%] flex-1">
                     <FormLabel>Marca</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Dell" {...field}
+                      <Input
+                        placeholder="Ex: Dell"
+                        {...field}
                         className={`${inputStyle} ${marcaTravada ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}`}
-                        disabled={marcaTravada} />
+                        disabled={marcaTravada}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
+                {/* Modelo */}
                 <FormField control={form.control} name="Modelo" render={({ field }) => (
                   <FormItem className="min-w-[48%] flex-1">
                     <FormLabel>Modelo</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Optiplex" {...field}
+                      <Input
+                        placeholder="Ex: Optiplex"
+                        {...field}
                         className={`${inputStyle} ${marcaTravada ? "bg-gray-100 text-gray-500 cursor-not-allowed" : "bg-white"}`}
-                        disabled={marcaTravada} />
+                        disabled={marcaTravada}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                <FormField
-                  control={form.control}
-                  name="Processador"
-                  render={({ field }) => (
-                    <FormItem className="min-w-[48%] flex-1">
-                      <FormLabel>Processador</FormLabel>
-
-                      {cardSelecionado === "generico" ? (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className={selectTriggerStyle}>
-                              <SelectValue placeholder="Selecione o processador" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="bg-white max-h-60">
-                            {processadoresGenericos.map((p, index) => (
+                {/* ✅ Processador — select para generico e dell, input travado para os demais */}
+                <FormField control={form.control} name="Processador" render={({ field }) => (
+                  <FormItem className="min-w-[48%] flex-1">
+                    <FormLabel>Processador</FormLabel>
+                    {cardSelecionado === "generico" || cardSelecionado === "dell" ? (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={selectTriggerStyle}>
+                            <SelectValue placeholder="Selecione o processador" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-white max-h-60">
+                          {cardSelecionado === "dell" ? (
+                            <>
+                              <SelectItem value="Intel Core I7-12700">Intel Core I7-12700</SelectItem>
+                              <SelectItem value="Intel Core I5-12400">Intel Core I5-12400</SelectItem>
+                            </>
+                          ) : (
+                            processadoresGenericos.map((p, index) => (
                               <SelectItem key={`${p.name}-${index}`} value={p.name}>
                                 {p.name}
                               </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <FormControl>
-                          <Input
-                            {...field}
-                            disabled={processadorTravado}
-                            className={`${inputStyle} bg-gray-100 text-gray-500 cursor-not-allowed`}
-                            placeholder="Processador"
-                          />
-                        </FormControl>
-                      )}
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={processadorTravado}
+                          className={`${inputStyle} bg-gray-100 text-gray-500 cursor-not-allowed`}
+                          placeholder="Processador"
+                        />
+                      </FormControl>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )} />
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="Memoria"
-                  render={({ field }) => (
-                    <FormItem className="min-w-[48%] flex-1">
-                      <FormLabel>Memoria Ram</FormLabel>
-
-
-                      {cardSelecionado === "generico" ? (
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger className={selectTriggerStyle}>
-                              <SelectValue placeholder="Selecione a Memoria ram" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="z-[9999] bg-white">
-                            {memoriasGenericas.map((m, index) => (
-                              <SelectItem key={`${m.name}-${index}`} value={m.name}>
-                                {m.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Memória do Preset"
-                            className={`${inputStyle} bg-gray-100 text-gray-500 cursor-not-allowed`}
-                            disabled={true}
-                          />
-                        </FormControl>
-                      )}
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* ✅ Memória — select para todos */}
+                <FormField control={form.control} name="Memoria" render={({ field }) => (
+                  <FormItem className="min-w-[48%] flex-1">
+                    <FormLabel>Memória RAM</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className={selectTriggerStyle}>
+                          <SelectValue placeholder="Selecione a memória" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="z-[9999] bg-white">
+                        {memoriasGenericas.map((m, index) => (
+                          <SelectItem key={`${m.name}-${index}`} value={m.name}>
+                            {m.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </div>
 
-              {/* Linha 2 (Items menores) */}
               <div className="flex flex-row flex-nowrap gap-5 w-full">
+                {/* Armazenamento */}
                 <FormField control={form.control} name="Armazenamento" render={({ field }) => (
-                  <FormItem className="w-[30%] flex-1">
+                  <FormItem className="w-[45%] flex-1">
                     <FormLabel>Armazenamento</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className={selectTriggerStyle}><SelectValue placeholder="Ex: 256 GB" /></SelectTrigger>
+                        <SelectTrigger className={selectTriggerStyle}>
+                          <SelectValue placeholder="Selecione o armazenamento" />
+                        </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="128 GB">128 GB</SelectItem>
-                        <SelectItem value="256 GB">256 GB</SelectItem>
-                        <SelectItem value="500 GB">500 GB</SelectItem>
-                        <SelectItem value="1 TB">1 TB</SelectItem>
+                      <SelectContent className="bg-white max-h-60">
+                        {armazensGenericos.map((a, index) => (
+                          <SelectItem key={`${a.name}-${index}`} value={a.name}>
+                            {a.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                <FormField control={form.control} name="tipoArmazenamento" render={({ field }) => (
-                  <FormItem className="w-[30%] flex-1">
-                    <FormLabel>Tipo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className={selectTriggerStyle}><SelectValue placeholder="Tipo" /></SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="HD">HD</SelectItem>
-                        <SelectItem value="SSD">SSD</SelectItem>
-                        <SelectItem value="Nvme">Nvme</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-
+                {/* Sistema Operacional */}
                 <FormField control={form.control} name="sistemaOperacional" render={({ field }) => (
                   <FormItem className="w-[30%] flex-1">
                     <FormLabel>Sistema</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger className={selectTriggerStyle}><SelectValue placeholder="SO" /></SelectTrigger>
+                        <SelectTrigger className={selectTriggerStyle}>
+                          <SelectValue placeholder="SO" />
+                        </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-white">
                         <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
@@ -531,7 +507,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
             <div className="flex flex-row flex-wrap gap-5 border-b border-black/10 pb-4 mb-4">
               <FormField control={form.control} name="PatrimonioMonitor" render={({ field }) => (
                 <FormItem className="min-w-[48%] flex-1">
-                  <FormLabel>Patrimonio</FormLabel>
+                  <FormLabel>Patrimônio</FormLabel>
                   <FormControl><Input placeholder="Ex: 363828" {...field} className={inputStyle} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -571,7 +547,7 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
             <div className="flex flex-row flex-wrap gap-5 border-b border-black/10 pb-4 mb-4">
               <FormField control={form.control} name="PatrimonioEstabilizador" render={({ field }) => (
                 <FormItem className="min-w-[48%] flex-1">
-                  <FormLabel>Patrimonio</FormLabel>
+                  <FormLabel>Patrimônio</FormLabel>
                   <FormControl><Input placeholder="Ex: 12345" {...field} className={inputStyle} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -608,36 +584,34 @@ export default function FormComputadores({ onClose }: { onClose: () => void }) {
             <h2 className="font-semibold text-lg text-gray-800">Localização</h2>
           </div>
           <div className="flex flex-row flex-wrap gap-5 pb-4">
-            <FormField control={form.control} name="secretariaId"
-              render={({ field }) => (
-                <FormItem className="min-w-[48%] flex-1">
-                  <FormLabel>Secretaria *</FormLabel>
-                  <Select
-                    value={field.value ? String(field.value) : undefined}
-                    onValueChange={(val) => {
-                      const id = Number(val);
-                      form.setValue("secretariaId", id);
-                      const sec = secretarias.find(s => s.id === id);
-                      setSetores(sec?.departamento || []);
-                      form.setValue("secretariaId", id, { shouldValidate: true }); // Resetar setor visualmente se necessário ou tratar com undefined
-                    }}
-                  >
-                    <FormControl>
-                      <SelectTrigger className={selectTriggerStyle}>
-                        <SelectValue placeholder="Selecione secretaria" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="z-[9999] bg-white max-h-60">
-                      {secretarias.map((s) => (
-                        <SelectItem key={s.id} value={String(s.id)}>{s.nome}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )} />
+            <FormField control={form.control} name="secretariaId" render={({ field }) => (
+              <FormItem className="min-w-[48%] flex-1">
+                <FormLabel>Secretaria *</FormLabel>
+                <Select
+                  value={field.value ? String(field.value) : undefined}
+                  onValueChange={(val) => {
+                    const id = Number(val);
+                    form.setValue("secretariaId", id, { shouldValidate: true });
+                    const sec = secretarias.find(s => s.id === id);
+                    setSetores(sec?.departamento || []);
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger className={selectTriggerStyle}>
+                      <SelectValue placeholder="Selecione secretaria" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="z-[9999] bg-white max-h-60">
+                    {secretarias.map((s) => (
+                      <SelectItem key={s.id} value={String(s.id)}>{s.nome}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )} />
 
-            <FormField control={form.control} name="setorId" render={({field}) => (
+            <FormField control={form.control} name="setorId" render={({ field }) => (
               <FormItem className="min-w-[48%] flex-1">
                 <FormLabel>Setor *</FormLabel>
                 <Select

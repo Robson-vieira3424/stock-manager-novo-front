@@ -26,8 +26,8 @@ interface ComputadorDTO {
 
 interface EstacaoTrabalhoDTO {
   id: string | number;
-  secretaria: string;
-  setor: string;
+  secretariaName: string; // ← campo que existe na entidade
+  departamentoName: string; // ← campo que existe na entidade
   computador: ComputadorDTO;
   localizacao: string;
 }
@@ -88,7 +88,7 @@ export default function TableComputador() {
         style: baseStyle + "border-[#0080ff] text-[#0080ff] bg-[#deeeff]",
       };
     }
-    if (mod.includes("thinkcentre") || mod.includes("lenovo")) {
+    if (mod.includes("thinkcenter") || mod.includes("lenovo")) {
       return {
         label: "ThinkCentre",
         style: baseStyle + "border-[#ef4444] text-[#ef4444] bg-[#ffd8d2]",
@@ -219,7 +219,11 @@ export default function TableComputador() {
                       <div className="flex text-[13px] font-medium text-black/80 items-center justify-center gap-[6px] w-full">
                         <FaMemory fontSize={14} color="rgba(0, 0, 0, 0.5)" />
                         {pc.memoria}
-                        <MdStorage fontSize={14} color="rgba(0, 0, 0, 0.5)" className="ml-1" />
+                        <MdStorage
+                          fontSize={14}
+                          color="rgba(0, 0, 0, 0.5)"
+                          className="ml-1"
+                        />
                         {pc.armazenamento}
                       </div>
                     </div>
@@ -229,19 +233,17 @@ export default function TableComputador() {
                   <TableCell className="p-4 align-middle border-b border-black/5">
                     <div className="flex flex-col gap-[2px] items-center text-center">
                       <div className="font-semibold text-gray-800 text-[14px]">
-                        {estacao.secretaria || "-"}
+                        {estacao.departamentoName|| "-"}
                       </div>
                       <div className="font-medium text-gray-500 text-[13px]">
-                        {estacao.setor || "-"}
+                        {estacao.secretariaName || "-"}
                       </div>
                     </div>
                   </TableCell>
 
                   {/* 6. Status */}
                   <TableCell className="p-4 text-center align-middle border-b border-black/5">
-                    <div className={statusInfo.style}>
-                      {statusInfo.label}
-                    </div>
+                    <div className={statusInfo.style}>{statusInfo.label}</div>
                   </TableCell>
                 </TableRow>
               );

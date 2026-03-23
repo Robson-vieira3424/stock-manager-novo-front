@@ -7,6 +7,7 @@ interface User {
   email: string;
   nome?: string;
   role?: string;
+  permissao?: string; 
 }
 
 // Tipagem das funções e dados disponíveis no contexto

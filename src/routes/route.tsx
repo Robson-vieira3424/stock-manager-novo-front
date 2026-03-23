@@ -15,11 +15,14 @@ import FeedbackPage from "@/pages/protected/feedback/Feedback"
 import ConfiguracoesPage from "@/pages/protected/configuracoes/ConfiguracoesPage"
 import ResetPassword from "@/pages/public/ResetPassword"
 import RecuperarSenha from "@/pages/public/ResetPassword"
+import AcessoNegado from "@/pages/public/AcessoNegado"
+import NotFound from "@/pages/public/NotFound"
 
 const TODOS = ["ROLE_ADMIN", "ROLE_ESTOQUISTA", "ROLE_TECNICO", "ROLE_SUPERVISOR"];
 const SO_ADMIN = ["ROLE_ADMIN"];
 const ESTOQUE = ["ROLE_ADMIN", "ROLE_ESTOQUISTA"];
 const MANUTENCAO = ["ROLE_ADMIN", "ROLE_TECNICO"];
+const DASHBOARD = ["ROLE_ADMIN", "ROLE_ESTOQUISTA", "ROLE_SUPERVISOR"];
 
 const router = createBrowserRouter([
   {
@@ -40,9 +43,13 @@ const router = createBrowserRouter([
     children: [
       // ── Todos os perfis ──────────────────────────────
       {
-        path: "/dashboard",
-        element: <DashboardPage />,
-      },
+  path: "/dashboard",
+  element: (
+    <RotaProtegida permissoesPermitidas={DASHBOARD}>
+      <DashboardPage />
+    </RotaProtegida>
+  ),
+},
       
       {
         path: "/feedbacks",
@@ -110,30 +117,16 @@ const router = createBrowserRouter([
           </RotaProtegida>
         ),
       },
-      {
-        path: "/sem-acesso",
-        element: (
-          <div className="h-full flex flex-col items-center justify-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-800">Acesso Negado</h1>
-            <p className="text-gray-500">Você não tem permissão para acessar esta página.</p>
-            <a href="/dashboard" className="text-blue-600 hover:underline text-sm">
-              Voltar ao Dashboard
-            </a>
-          </div>
-        ),
-      },
+     {
+  path: "/sem-acesso",
+  element: <AcessoNegado />,
+},
     ],
   },
   {
-    path: "*",
-    element: (
-      <div className="h-screen flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold text-gray-800">404</h1>
-        <p className="text-gray-600">Página não encontrada</p>
-        <a href="/" className="mt-4 text-blue-600 hover:underline">Voltar ao início</a>
-      </div>
-    ),
-  },
+  path: "*",
+  element: <NotFound/>,
+},
 ]);
 
 const Routers = () => <RouterProvider router={router} />;

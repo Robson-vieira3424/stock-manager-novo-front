@@ -91,10 +91,15 @@ export default function FormMoviments({ onClose }: FormMovimentsProps) {
       alert("Movimentação registrada com sucesso!");
       onClose(true); // Fecha e avisa para atualizar a lista
       
-    } catch (error) {
-      console.error("Erro ao registrar:", error);
-      alert("Erro ao salvar. Verifique se você tem permissão ou se os dados estão corretos.");
-    }
+    }catch (error) {
+  console.error("Erro ao registrar:", error);
+  
+  const mensagem = error.response?.data?.mensagem 
+    || error.response?.data?.message
+    || "Erro ao salvar. Tente novamente.";
+    
+  alert(mensagem);
+}
   };
 
   // Handler para mudança de secretaria (Limpa o departamento)

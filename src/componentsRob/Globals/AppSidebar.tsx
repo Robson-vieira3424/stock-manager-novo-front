@@ -32,7 +32,7 @@ export default function AppSidebar() {
   };
 
   const menuItems = [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, visivel: true },
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard, visivel: isAdmin || isEstoquista },
     { title: "Mapeamento", url: "/mapeamento", icon: MapPinned, visivel: isAdmin },
     { title: "Feedback", url: "/feedbacks", icon: MessageSquarePlus, visivel: true },
     { title: "Estoque", url: "/produtos", icon: Package, visivel: isAdmin || isEstoquista },

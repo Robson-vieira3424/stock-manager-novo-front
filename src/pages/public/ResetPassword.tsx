@@ -159,7 +159,7 @@ export default function RecuperarSenha() {
     e.preventDefault();
     setError(""); setIsLoading(true);
     try {
-      await api.post("/forgot-password", { email });
+      await api.post("/api/forgot-password", { email });
       setStep("codigo"); setReenvioTimer(60);
     } catch (err: any) {
       setError(err.response?.data?.message || "Falha na conexão com o servidor.");
@@ -193,7 +193,7 @@ export default function RecuperarSenha() {
     if (codigoCompleto.length < 6) { setError("Digite todos os 6 dígitos do código."); return; }
     setError(""); setIsLoading(true);
     try {
-      await api.post("/verify-reset-code", { email, codigo: codigoCompleto });
+      await api.post("/api/verify-reset-code", { email, codigo: codigoCompleto });
       setStep("senha");
     } catch (err: any) {
       setError(err.response?.data?.message || "Código inválido ou expirado.");
@@ -206,7 +206,7 @@ export default function RecuperarSenha() {
     if (reenvioTimer > 0) return;
     setError("");
     try {
-      await api.post("/forgot-password", { email });
+      await api.post("/api/forgot-password", { email });
       setReenvioTimer(60);
       setCodigo(["", "", "", "", "", ""]);
       inputsRef.current[0]?.focus();
@@ -219,7 +219,7 @@ export default function RecuperarSenha() {
     if (novaSenha.length < 8) { setError("A senha deve ter no mínimo 8 caracteres."); return; }
     setError(""); setIsLoading(true);
     try {
-      await api.post("/reset-password", { email, codigo: codigoCompleto, novaSenha });
+      await api.post("/api/reset-password", { email, codigo: codigoCompleto, novaSenha });
       setStep("sucesso");
     } catch (err: any) {
       setError(err.response?.data?.message || "Não foi possível redefinir a senha.");
